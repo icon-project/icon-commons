@@ -4,7 +4,7 @@ import os
 from setuptools import setup, find_packages
 
 requires = [
-    "coloredlogs"
+    "coloredlogs==9.0"
 ]
 
 with open(os.path.join('.', 'VERSION')) as version_file:
