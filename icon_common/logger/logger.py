@@ -20,7 +20,7 @@ from logging.handlers import TimedRotatingFileHandler
 from enum import IntFlag
 from typing import Union
 
-from icon_config import IconConfig
+from icon_common.icon_config import IconConfig
 
 
 default_log_config = {
@@ -58,8 +58,13 @@ class Logger:
     DEFAULT_LOG_TAG = "LOG"
 
     @staticmethod
-    def load_config(config_path: str = None):
-        conf = IconConfig(config_path, default_log_config)[Logger.CATEGORY]
+    def load_config(config: 'IconConfig' = None, config_path: str = None):
+        if config is None:
+            conf = IconConfig(config_path, default_log_config)
+        else:
+            conf = config
+
+        conf = conf[Logger.CATEGORY]
         Logger._update_logger(conf)
 
         Logger._update_other_logger_level('pika', Logger.LogLevel.WARNING.value)
@@ -67,7 +72,6 @@ class Logger:
         Logger._update_other_logger_level('sanic.access', Logger.LogLevel.WARNING.value)
         Logger._update_other_logger_level('jsonrpcclient.client.request', Logger.LogLevel.WARNING.value)
         Logger._update_other_logger_level('jsonrpcclient.client.response', Logger.LogLevel.WARNING.value)
-
 
     @staticmethod
     def _update_logger(conf: 'IconConfig', logger: 'BuiltinLogger'=None):
