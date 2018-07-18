@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import logging
 import coloredlogs
 
@@ -111,10 +112,12 @@ class Logger:
             handlers.append(logging.StreamHandler())
 
         if handler_type & Logger.LogHandlerType.FILE:
+            Logger._ensure_dir(log_file_path)
             handlers.append(
                 logging.FileHandler(log_file_path, 'w', 'utf-8'))
 
         if handler_type & Logger.LogHandlerType.DAILY:
+            Logger._ensure_dir(log_file_path)
             handlers.append(
                 TimedRotatingFileHandler(log_file_path, when='D'))
 
@@ -151,6 +154,12 @@ class Logger:
         logger = logging.getLogger(logger_name)
         if logger is not None:
             logger.setLevel(log_level)
+
+    @staticmethod
+    def _ensure_dir(file_path):
+        directory = os.path.dirname(file_path)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
 
     @staticmethod
     def debug(msg: Union[str, BaseException], tag: str = DEFAULT_LOG_TAG):
