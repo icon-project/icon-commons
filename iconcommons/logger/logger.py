@@ -21,7 +21,7 @@ from logging.handlers import TimedRotatingFileHandler
 from enum import IntFlag
 from typing import Union
 
-from icon_common.icon_config import IconConfig
+from iconcommons.icon_config import IconConfig
 
 
 default_log_config = {

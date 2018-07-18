@@ -19,7 +19,7 @@
 import unittest
 import os.path
 
-from icon_common.logger import Logger
+from iconcommons.logger import Logger
 
 
 TAG = 'logger'

@@ -11,9 +11,9 @@ with open(os.path.join('.', 'VERSION')) as version_file:
     version = version_file.read().strip()
 
 setup_options = {
-    'name': 'iconCommon',
+    'name': 'iconcommons',
     'version': version,
-    'description': 'icon commmon package for python',
+    'description': 'icon commmons package for python',
     'author': 'ICON foundation',
     'packages': find_packages(exclude=['tests*', 'docs']),
     'license': "Apache License 2.0",
