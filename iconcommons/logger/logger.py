@@ -85,7 +85,7 @@ class Logger:
         log_level = Logger.LogLevel[conf[Logger.LEVEL].upper()]
         if logger is logging.root:
             handlers = Logger._make_handler(conf)
-            log_format = conf[Logger.FORMAT]
+            log_format = conf.get(Logger.FORMAT, default_log_config[Logger.CATEGORY][Logger.FORMAT])
 
             logging.basicConfig(handlers= handlers,
                                 format=log_format,
