@@ -30,7 +30,9 @@ default_log_config = {
         "colorLog": True,
         "level": "debug",
         "filePath": "./logger.log",
-        "outputType": "console|file|daily"
+        "outputType": "console|file",
+        "rotateType": "D",
+        "rotateInterval": 1
     }
 }
 
@@ -48,7 +50,6 @@ class Logger:
         NONE = 0
         CONSOLE = 1
         FILE = 2
-        DAILY = 4
 
     CATEGORY = 'log'
     OUTPUT_TYPE = 'outputType'
@@ -56,16 +57,18 @@ class Logger:
     FORMAT = 'format'
     LEVEL = 'level'
     COLOR = 'colorLog'
+    ROTATE_TYPE = 'rotateType'
+    ROTATE_INTERVAL = 'rotateInterval'
     DEFAULT_LOG_TAG = "LOG"
 
     @staticmethod
     def load_config(config: 'IconConfig' = None, config_path: str = None):
         if config is None:
-            conf = IconConfig(config_path, default_log_config)
+            conf = IconConfig(config_path, default_log_config)[Logger.CATEGORY]
         else:
-            conf = config
+            conf = IconConfig("", default_log_config)[Logger.CATEGORY]
+            conf.update(config[Logger.CATEGORY])
 
-        conf = conf[Logger.CATEGORY]
         Logger._update_logger(conf)
 
         Logger._update_other_logger_level('pika', Logger.LogLevel.WARNING.value)
@@ -85,7 +88,7 @@ class Logger:
         log_level = Logger.LogLevel[conf[Logger.LEVEL].upper()]
         if logger is logging.root:
             handlers = Logger._make_handler(conf)
-            log_format = conf.get(Logger.FORMAT, default_log_config[Logger.CATEGORY][Logger.FORMAT])
+            log_format = conf[Logger.FORMAT]
 
             logging.basicConfig(handlers= handlers,
                                 format=log_format,
@@ -116,10 +119,12 @@ class Logger:
             handlers.append(
                 logging.FileHandler(log_file_path, 'w', 'utf-8'))
 
-        if handler_type & Logger.LogHandlerType.DAILY:
+        rotate_type = conf[Logger.ROTATE_TYPE]
+        rotate_interval = conf[Logger.ROTATE_INTERVAL]
+        if rotate_interval > 0:
             Logger._ensure_dir(log_file_path)
             handlers.append(
-                TimedRotatingFileHandler(log_file_path, when='D'))
+                TimedRotatingFileHandler(log_file_path, when=rotate_type, interval=rotate_interval))
 
         return handlers
 

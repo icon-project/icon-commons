@@ -19,6 +19,7 @@
 import unittest
 import os.path
 
+from iconcommons.icon_config import IconConfig
 from iconcommons.logger import Logger
 
 
@@ -28,7 +29,9 @@ TAG = 'logger'
 class TestLogger(unittest.TestCase):
     def setUp(self):
         file_path = os.path.join(os.path.dirname(__file__), 'logger.json')
-        Logger.load_config(file_path)
+        conf = IconConfig(file_path)
+        conf.load()
+        Logger.load_config(conf, file_path)
 
     def tearDown(self):
         if os.path.exists('log.txt'):
