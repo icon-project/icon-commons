@@ -4,14 +4,11 @@
 		"level": "debug",
 		"filePath": "./log/icon_service.log"
 	},
-	"iconScoreRootPath": ".score",
-	"iconScoreStateDbRootPath": ".db",
+	"scoreRootPath": ".score",
+	"scoreStateDbRootPath": ".statedb",
 	"channel": "loopchain_default",
 	"amqpKey": "7100",
 	"amqpTarget": "127.0.0.1",
 	"iconServiceBigStopLimit": 5000000,
-	"loggerDev": true,
-	"adminAddress": "hxebf3a409845cd09dcb5af31ed5be5e34e2af9433",
-	"enableThreadFlag": 0,
-	"iconServiceFlag": 0
+	"builtinScoreOwner": "hxebf3a409845cd09dcb5af31ed5be5e34e2af9433"
 }

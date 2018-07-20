@@ -32,7 +32,7 @@ default_log_config = {
         "filePath": "./logger.log",
         "outputType": "console|file",
         "rotateType": "D",
-        "rotateInterval": 1
+        "rotateInterval": 0
     }
 }
 
