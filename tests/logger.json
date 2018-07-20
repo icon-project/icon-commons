@@ -5,7 +5,7 @@
 		"filePath": "./log/icon_service.log"
 	},
 	"scoreRootPath": ".score",
-	"scoreStateDbRootPath": ".statedb",
+	"stateDbRootPath": ".statedb",
 	"channel": "loopchain_default",
 	"amqpKey": "7100",
 	"amqpTarget": "127.0.0.1",
