@@ -28,7 +28,7 @@ default_log_config = {
     "log": {
         "format": "%(asctime)s %(levelname)s %(message)s",
         "colorLog": True,
-        "level": "debug",
+        "level": "info",
         "filePath": "./logger.log",
         "outputType": "console|file",
         "rotateType": "D",

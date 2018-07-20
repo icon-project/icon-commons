@@ -1,7 +1,7 @@
 {
 	"log": {
 		"colorLog": true,
-		"level": "debug",
+		"level": "info",
 		"filePath": "./log/icon_service.log"
 	},
 	"scoreRootPath": ".score",
