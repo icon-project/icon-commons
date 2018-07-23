@@ -6,8 +6,10 @@
 		"filePath": "./log/icon_service.log",
         "outputType": "console|file",
         "rotate": {
-            "when": "",
-            "interval": 0,
+            "type": "period|bytes",
+            "period": "s",
+            "interval": 1,
+            "maxBytes": 10240000,
             "backupCount": 5
         }
 	},
