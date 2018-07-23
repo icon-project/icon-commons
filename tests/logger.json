@@ -1,6 +1,6 @@
 {
 	"log": {
-        "loggerName": "test",
+        "logger": "test",
 		"colorLog": true,
 		"level": "debug",
 		"filePath": "./log/icon_service.log",

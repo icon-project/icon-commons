@@ -25,19 +25,8 @@ from .IconRotatingFileHandler import IconRotatingFileHandler, TimedRotatingFileH
 
 default_log_config = {
     "log": {
-        "logger": "logger",
         "format": "[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s",
-        "colorLog": True,
-        "level": "info",
-        "filePath": "./logger.log",
-        "outputType": "console|file",
-        "rotate": {
-            "type": "period|bytes",
-            "period": "daily",
-            "interval": 1,
-            "maxBytes": 10 * 1024 * 1024,
-            "backupCount": 10
-        }
+        "outputType": "console"
     }
 }
 
@@ -87,20 +76,34 @@ class Logger:
     @staticmethod
     def load_config(config: 'IconConfig' = None, config_path: str = None) -> None:
         if config is None:
-            conf = IconConfig(config_path, default_log_config)[Logger.CATEGORY]
+            conf = IconConfig(config_path, default_log_config)
         else:
             conf = IconConfig("", default_log_config)
             conf.update_conf(config)
-            conf = conf[Logger.CATEGORY]
+        log_conf = conf[Logger.CATEGORY]
 
-        Logger._init_logger(conf[Logger.LOGGER_NAME])
-        Logger._update_logger(conf)
+        Logger._init_logger(log_conf[Logger.LOGGER_NAME])
+        Logger._update_logger(log_conf)
 
         Logger._update_other_logger_level('pika', Logger.LogLevel.WARNING.value)
         Logger._update_other_logger_level('aio_pika', Logger.LogLevel.WARNING.value)
         Logger._update_other_logger_level('sanic.access', Logger.LogLevel.WARNING.value)
         Logger._update_other_logger_level('jsonrpcclient.client.request', Logger.LogLevel.WARNING.value)
         Logger._update_other_logger_level('jsonrpcclient.client.response', Logger.LogLevel.WARNING.value)
+
+        Logger.info(f'====================LOG CONFIG====================')
+        Logger.print_config(conf)
+        Logger.info(f'====================LOG CONFIG====================')
+
+    @staticmethod
+    def print_config(conf: dict, prefix: str='CONFIG'):
+        for key, value in conf.items():
+            if not isinstance(value, dict):
+                tmp_prefix = '{}.{}'.format(prefix, key)
+                Logger.info(f'[LOG CONFIG] [{tmp_prefix}] > {value}')
+            else:
+                tmp_prefix = '{}.{}'.format(prefix, key)
+                Logger.print_config(value, tmp_prefix)
 
     @staticmethod
     def _update_logger(conf: dict):

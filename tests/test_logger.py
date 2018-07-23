@@ -27,7 +27,7 @@ TAG = 'logger'
 
 default_icon_config = {
     "log": {
-        "loggerName": "iconservice",
+        "logger": "iconservice",
         "colorLog": True,
         "level": "info",
         "filePath": "./log/iconservice.log",
