@@ -25,17 +25,39 @@ from iconcommons.logger import Logger
 
 TAG = 'logger'
 
+default_icon_config = {
+    "log": {
+        "loggerName": "iconservice",
+        "colorLog": True,
+        "level": "info",
+        "filePath": "./log/iconservice.log",
+        "outputType": "console|file"
+    },
+    "config": './conf/iconservice_config.json',
+    "scoreRootPath": ".score",
+    "stateDbRootPath": ".statedb",
+    "channel": "loopchain_default",
+    "amqpKey": "7100",
+    "amqpTarget": "127.0.0.1",
+    "builtinScoreOwner": "hxebf3a409845cd09dcb5af31ed5be5e34e2af9433",
+    "service": {
+        "fee": False,
+        "audit": False
+    }
+}
+
 
 class TestLogger(unittest.TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         file_path = os.path.join(os.path.dirname(__file__), 'logger.json')
-        conf = IconConfig(file_path)
+        conf = IconConfig(file_path, default_icon_config)
         conf.load()
         Logger.load_config(conf, file_path)
 
-    def tearDown(self):
-        if os.path.exists('log.txt'):
-            os.remove('log.txt')
+    @classmethod
+    def tearDownClass(cls):
+        pass
 
     def test_debug(self):
         Logger.debug('debug log')
@@ -48,6 +70,10 @@ class TestLogger(unittest.TestCase):
     def test_warning(self):
         Logger.warning('warning log')
         Logger.warning('warning log', TAG)
+
+    def test_exception(self):
+        Logger.exception('exception log')
+        Logger.exception('exception log', TAG)
 
     def test_error(self):
         Logger.error('error log')
