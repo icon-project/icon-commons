@@ -348,4 +348,4 @@ class Logger:
         elif config_key == 'minutely':
             return 'M'
         else:
-            return 'S'
+            return 'D'
