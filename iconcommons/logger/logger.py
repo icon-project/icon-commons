@@ -142,6 +142,7 @@ class Logger:
         for output in outputs:
             handler_type |= Logger.LogHandlerType[output.upper()]
 
+        Logger._set_level(log_level)
         if Logger._is_flag_on(handler_type, Logger.LogHandlerType.CONSOLE):
             handler = logging.StreamHandler()
             handler.setFormatter(formatter)
@@ -185,6 +186,11 @@ class Logger:
     @staticmethod
     def _is_flag_on(src_flag: int, dest_flag: int) -> bool:
         return src_flag & dest_flag == dest_flag
+
+    @staticmethod
+    def _set_level(log_level: str):
+        for logger in Logger._logger_mapper.values():
+            logger.setLevel(log_level)
 
     @staticmethod
     def _apply_console_logger(logger_type: str,

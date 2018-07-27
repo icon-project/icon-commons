@@ -30,13 +30,8 @@ TAG = 'logger'
 
 default_icon_config = {
     "log": {
-        "logger": "iconservice",
-        "colorLog": True,
-        "level": "info",
-        "filePath": "./log/iconservice.log",
-        "outputType": "console|file"
+        "logger": "iconservice"
     },
-    "config": './conf/iconservice_config.json',
     "scoreRootPath": ".score",
     "stateDbRootPath": ".statedb",
     "channel": "loopchain_default",
