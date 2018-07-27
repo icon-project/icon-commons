@@ -19,8 +19,11 @@
 import unittest
 import os.path
 
+from logging import Logger as builtin_logger
+
 from iconcommons.icon_config import IconConfig
 from iconcommons.logger import Logger
+from iconcommons.logger.icon_rotationg_file_handler import IconRotatingFileHandler
 
 
 TAG = 'logger'
@@ -50,10 +53,15 @@ default_icon_config = {
 class TestLogger(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        file_path = os.path.join(os.path.dirname(__file__), 'logger_old.json')
+        cls.conf = IconConfig(file_path, default_icon_config)
+        cls.conf.load()
+        Logger.load_config(cls.conf, file_path)
+
         file_path = os.path.join(os.path.dirname(__file__), 'logger.json')
-        conf = IconConfig(file_path, default_icon_config)
-        conf.load()
-        Logger.load_config(conf, file_path)
+        cls.conf = IconConfig(file_path, default_icon_config)
+        cls.conf.load()
+        Logger.load_config(cls.conf, file_path)
 
     @classmethod
     def tearDownClass(cls):
@@ -78,6 +86,17 @@ class TestLogger(unittest.TestCase):
     def test_error(self):
         Logger.error('error log')
         Logger.error('error log', TAG)
+
+    def test_config(self):
+        logger: builtin_logger = Logger._logger_mapper.get(Logger.DEFAULT_LOGGER)
+        self.assertEqual(logger.name, self.conf['log']['logger'])
+        log_str: str = self.conf['log']['level']
+        log_str = log_str.upper()
+        self.assertEqual(logger.level, Logger.LogLevel[log_str].value)
+        self.assertEqual(2, len(logger.handlers))
+        handler = logger.handlers[1]
+        if not isinstance(handler, IconRotatingFileHandler):
+            raise Exception
 
 
 if __name__ == '__main__':
