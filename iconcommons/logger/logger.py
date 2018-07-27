@@ -133,11 +133,11 @@ class Logger:
     def _apply_conf(conf: dict) -> None:
         log_level = Logger.LogLevel[conf[Logger.LEVEL].upper()]
         formatter = logging.Formatter(conf[Logger.FORMAT])
-        enable_color = conf[Logger.COLOR]
-        log_file_path = conf[Logger.FILE_PATH]
+        enable_color = conf.get(Logger.COLOR, False)
+        log_file_path = conf.get(Logger.FILE_PATH, str())
 
         handler_type = Logger.LogHandlerType.NONE
-        output_type: str = conf[Logger.OUTPUT_TYPE]
+        output_type: str = conf.get(Logger.OUTPUT_TYPE, 'console')
         outputs = output_type.split('|')
         for output in outputs:
             handler_type |= Logger.LogHandlerType[output.upper()]
