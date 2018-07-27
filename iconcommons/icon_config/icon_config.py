@@ -36,10 +36,25 @@ class IconConfig(dict):
         if user_input:
             self.update({k: v for k, v in user_input.items() if v})
 
-    def _load(self, conf_path: str):
+    def _load(self, conf_path: str) -> bool:
         if not os.path.exists(conf_path):
             return False
         with open(conf_path) as f:
             conf: dict = json.load(f)
-            self.update(conf)
+            self.update_conf(conf)
             return True
+
+    def update_conf(self, conf: dict, src_conf: dict= None) -> None:
+        if src_conf is None:
+            src_conf = self
+
+        for key, value in conf.items():
+            if not isinstance(value, dict):
+                src_conf[key] = conf[key]
+            else:
+                src_dict = src_conf.get(key)
+                conf_dict = conf.get(key, {})
+                if src_dict is None:
+                    src_conf[key] = conf_dict
+                else:
+                    self.update_conf(conf_dict, src_conf[key])

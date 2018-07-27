@@ -16,28 +16,25 @@ import os
 import logging
 import coloredlogs
 
-from logging import Logger as BuiltinLogger
-from logging.handlers import TimedRotatingFileHandler
+from logging import Logger as BuiltinLogger, FileHandler
 from enum import IntFlag
 from typing import Union
 
 from iconcommons.icon_config import IconConfig
+from .icon_rotationg_file_handler import IconRotatingFileHandler, TimedRotatingFileHandler, RotatingFileHandler
 
 
 default_log_config = {
     "log": {
-        "format": "%(asctime)s %(levelname)s %(message)s",
-        "colorLog": True,
-        "level": "info",
-        "filePath": "./logger.log",
-        "outputType": "console|file",
-        "rotateType": "D",
-        "rotateInterval": 0
+        "format": "[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s",
+        "outputType": "console"
     }
 }
 
 
 class Logger:
+    _logger_mapper = {}
+
     class LogLevel(IntFlag):
         NOTSET = 0
         DEBUG = 10
@@ -51,25 +48,43 @@ class Logger:
         CONSOLE = 1
         FILE = 2
 
+    class LogRotateType(IntFlag):
+        NONE = 0
+        PERIOD = 1
+        BYTES = 2
+        BOTH = PERIOD | BYTES
+
     CATEGORY = 'log'
+    LOGGER_NAME = 'logger'
     OUTPUT_TYPE = 'outputType'
     FILE_PATH = 'filePath'
     FORMAT = 'format'
     LEVEL = 'level'
     COLOR = 'colorLog'
-    ROTATE_TYPE = 'rotateType'
-    ROTATE_INTERVAL = 'rotateInterval'
+    ROTATE = 'rotate'
+    ROTATE_TYPE = 'type'
+    ROTATE_PERIOD = 'period'
+    ROTATE_INTERVAL = 'interval'
+    ROTATE_MAX_BYTES = 'maxBytes'
+    ROTATE_BACKUP_COUNT = 'backupCount'
+
     DEFAULT_LOG_TAG = "LOG"
 
-    @staticmethod
-    def load_config(config: 'IconConfig' = None, config_path: str = None):
-        if config is None:
-            conf = IconConfig(config_path, default_log_config)[Logger.CATEGORY]
-        else:
-            conf = IconConfig("", default_log_config)[Logger.CATEGORY]
-            conf.update(config[Logger.CATEGORY])
+    DEFAULT_LOGGER = 'default_logger'
+    EXC_CONSOLE_LOGGER = 'exc_console_logger'
+    EXC_FILE_LOGGER = 'exc_file_logger'
 
-        Logger._update_logger(conf)
+    @staticmethod
+    def load_config(config: 'IconConfig' = None, config_path: str = None) -> None:
+        if config is None:
+            conf = IconConfig(config_path, default_log_config)
+        else:
+            conf = IconConfig("", default_log_config)
+            conf.update_conf(config)
+        log_conf = conf[Logger.CATEGORY]
+
+        Logger._init_logger(log_conf[Logger.LOGGER_NAME])
+        Logger._update_logger(log_conf)
 
         Logger._update_other_logger_level('pika', Logger.LogLevel.WARNING.value)
         Logger._update_other_logger_level('aio_pika', Logger.LogLevel.WARNING.value)
@@ -77,59 +92,178 @@ class Logger:
         Logger._update_other_logger_level('jsonrpcclient.client.request', Logger.LogLevel.WARNING.value)
         Logger._update_other_logger_level('jsonrpcclient.client.response', Logger.LogLevel.WARNING.value)
 
+        Logger.info(f'====================LOG CONFIG====================')
+        Logger.print_config(conf)
+        Logger.info(f'====================LOG CONFIG====================')
+
     @staticmethod
-    def _update_logger(conf: 'IconConfig', logger: 'BuiltinLogger'=None):
-        if logger is None:
-            logger = logging.root
+    def print_config(conf: dict, prefix: str = 'CONFIG'):
+        for key, value in conf.items():
+            if not isinstance(value, dict):
+                tmp_prefix = '{}.{}'.format(prefix, key)
+                Logger.info(f'[LOG CONFIG] [{tmp_prefix}] > {value}')
+            else:
+                tmp_prefix = '{}.{}'.format(prefix, key)
+                Logger.print_config(value, tmp_prefix)
 
-        for handler in logger.handlers[:]:
-            logger.removeHandler(handler)
+    @staticmethod
+    def _update_logger(conf: dict):
+        Logger._clear_logger_handler()
+        Logger._apply_conf(conf)
 
+    @staticmethod
+    def _init_logger(logger_name: str):
+        Logger._logger_mapper.clear()
+        Logger._register_logger_mapper(logger_name, Logger.DEFAULT_LOGGER)
+        Logger._register_logger_mapper(logger_name + 'exc_file', Logger.EXC_FILE_LOGGER)
+        Logger._register_logger_mapper(logger_name + 'exc_console', Logger.EXC_CONSOLE_LOGGER)
+
+    @staticmethod
+    def _register_logger_mapper(logger_name: str, logger_type: str):
+        logger = logging.getLogger(logger_name)
+        Logger._logger_mapper[logger_type] = logger
+
+    @staticmethod
+    def _clear_logger_handler():
+        for logger in Logger._logger_mapper.values():
+            for handler in logger.handlers[:]:
+                logger.removeHandler(handler)
+
+    @staticmethod
+    def _apply_conf(conf: dict) -> None:
         log_level = Logger.LogLevel[conf[Logger.LEVEL].upper()]
-        if logger is logging.root:
-            handlers = Logger._make_handler(conf)
-            log_format = conf[Logger.FORMAT]
-
-            logging.basicConfig(handlers= handlers,
-                                format=log_format,
-                                datefmt="%m-%d %H:%M:%S",
-                                level=log_level)
-
-            log_color = conf[Logger.COLOR]
-            if log_color:
-                Logger._update_log_color_set(log_format, log_level, logger)
-        else:
-            logger.setLevel(log_level)
-
-    @staticmethod
-    def _make_handler(conf: 'IconConfig') -> []:
-        handlers = []
+        formatter = logging.Formatter(conf[Logger.FORMAT])
+        enable_color = conf[Logger.COLOR]
+        log_file_path = conf[Logger.FILE_PATH]
 
         handler_type = Logger.LogHandlerType.NONE
-        log_file_path = conf[Logger.FILE_PATH]
         output_type: str = conf[Logger.OUTPUT_TYPE]
         outputs = output_type.split('|')
         for output in outputs:
             handler_type |= Logger.LogHandlerType[output.upper()]
-        if handler_type & Logger.LogHandlerType.CONSOLE:
-            handlers.append(logging.StreamHandler())
 
-        if handler_type & Logger.LogHandlerType.FILE:
-            Logger._ensure_dir(log_file_path)
-            handlers.append(
-                logging.FileHandler(log_file_path, 'w', 'utf-8'))
+        if Logger._is_flag_on(handler_type, Logger.LogHandlerType.CONSOLE):
+            handler = logging.StreamHandler()
+            handler.setFormatter(formatter)
+            Logger._apply_console_logger(Logger.DEFAULT_LOGGER, handler, enable_color, formatter, log_level)
+            Logger._apply_console_logger(Logger.EXC_CONSOLE_LOGGER, handler, enable_color, formatter, log_level)
 
-        rotate_type = conf[Logger.ROTATE_TYPE]
-        rotate_interval = conf[Logger.ROTATE_INTERVAL]
-        if rotate_interval > 0:
-            Logger._ensure_dir(log_file_path)
-            handlers.append(
-                TimedRotatingFileHandler(log_file_path, when=rotate_type, interval=rotate_interval))
+        if Logger._is_flag_on(handler_type, Logger.LogHandlerType.FILE):
+            rotation_conf: dict = conf.get(Logger.ROTATE)
+            if rotation_conf is not None:
+                rotate_type = Logger.LogRotateType.NONE
+                rotate_types: str = rotation_conf[Logger.ROTATE_TYPE]
+                outputs = rotate_types.split('|')
+                for output in outputs:
+                    rotate_type |= Logger.LogRotateType[output.upper()]
 
-        return handlers
+                rotate_period = Logger._convert_interval_key(rotation_conf[Logger.ROTATE_PERIOD])
+                rotate_interval = rotation_conf[Logger.ROTATE_INTERVAL]
+                rotate_max_bytes = rotation_conf[Logger.ROTATE_MAX_BYTES]
+                backup_count = rotation_conf[Logger.ROTATE_BACKUP_COUNT]
+
+                if Logger._is_flag_on(rotate_type, Logger.LogRotateType.BOTH):
+                    Logger._apply_icon_rotate_file_logger(
+                        Logger.DEFAULT_LOGGER, log_file_path, rotate_period, rotate_interval,
+                        rotate_max_bytes, backup_count, formatter)
+                    Logger._apply_icon_rotate_file_logger(
+                        Logger.EXC_FILE_LOGGER, log_file_path, rotate_period, rotate_interval,
+                        rotate_max_bytes, backup_count, formatter)
+                elif Logger._is_flag_on(rotate_type, Logger.LogRotateType.PERIOD):
+                    Logger._apply_time_rotate_file_logger(
+                        Logger.DEFAULT_LOGGER, log_file_path, rotate_period, rotate_interval, backup_count, formatter)
+                    Logger._apply_time_rotate_file_logger(
+                        Logger.EXC_FILE_LOGGER, log_file_path, rotate_period, rotate_interval, backup_count, formatter)
+                elif Logger._is_flag_on(rotate_type, Logger.LogRotateType.BYTES):
+                    Logger._apply_rotate_file_logger(
+                        Logger.DEFAULT_LOGGER, log_file_path, rotate_max_bytes, backup_count, formatter)
+                    Logger._apply_rotate_file_logger(
+                        Logger.EXC_FILE_LOGGER, log_file_path, rotate_max_bytes, backup_count, formatter)
+            else:
+                Logger._apply_file_logger(Logger.DEFAULT_LOGGER, log_file_path, formatter)
 
     @staticmethod
-    def _update_log_color_set(log_format: str, log_level: str, logger: 'BuiltinLogger'):
+    def _is_flag_on(src_flag: int, dest_flag: int) -> bool:
+        return src_flag & dest_flag == dest_flag
+
+    @staticmethod
+    def _apply_console_logger(logger_type: str,
+                              handler: 'logging.Handler',
+                              enable_color: bool,
+                              fmt: 'logging.Formatter',
+                              log_level: str) -> None:
+        logger = Logger._logger_mapper[logger_type]
+        logger.addHandler(handler)
+        if enable_color:
+            Logger._update_log_color_set(fmt, log_level, logger)
+
+    @staticmethod
+    def _apply_file_logger(logger_type: str,
+                           file_path: str,
+                           fmt: 'logging.Formatter') -> None:
+        file_path = Logger._make_log_path(logger_type, file_path)
+        Logger._ensure_dir(file_path)
+        handler = FileHandler(file_path, 'a')
+        handler.setFormatter(fmt)
+        logger = Logger._logger_mapper[logger_type]
+        logger.addHandler(handler)
+
+    @staticmethod
+    def _apply_icon_rotate_file_logger(logger_type: str,
+                                       file_path: str,
+                                       when: str,
+                                       interval: int,
+                                       max_bytes: int,
+                                       backup_count: int,
+                                       fmt: 'logging.Formatter'):
+        file_path = Logger._make_log_path(logger_type, file_path)
+        Logger._ensure_dir(file_path)
+        handler = IconRotatingFileHandler(file_path, maxBytes=max_bytes,
+                                          when=when, interval=interval,
+                                          backupCount=backup_count)
+        handler.setFormatter(fmt)
+        logger = Logger._logger_mapper[logger_type]
+        logger.addHandler(handler)
+
+    @staticmethod
+    def _apply_time_rotate_file_logger(logger_type: str,
+                                       file_path: str,
+                                       when: str,
+                                       interval: int,
+                                       backup_count: int,
+                                       fmt: 'logging.Formatter'):
+        file_path = Logger._make_log_path(logger_type, file_path)
+        Logger._ensure_dir(file_path)
+        handler = TimedRotatingFileHandler(file_path,
+                                           when=when, interval=interval, backupCount=backup_count)
+        handler.setFormatter(fmt)
+        logger = Logger._logger_mapper[logger_type]
+        logger.addHandler(handler)
+
+    @staticmethod
+    def _apply_rotate_file_logger(logger_type: str,
+                                  file_path: str,
+                                  max_bytes: int,
+                                  backup_count: int,
+                                  fmt: 'logging.Formatter'):
+        file_path = Logger._make_log_path(logger_type, file_path)
+        Logger._ensure_dir(file_path)
+        handler = RotatingFileHandler(file_path, maxBytes=max_bytes, backupCount=backup_count)
+        handler.setFormatter(fmt)
+        logger = Logger._logger_mapper[logger_type]
+        logger.addHandler(handler)
+
+    @staticmethod
+    def _make_log_path(logger_type: str, src_path: str) -> str:
+        if logger_type == Logger.DEFAULT_LOGGER:
+            return src_path
+        else:
+            src_filename = src_path.rpartition('/')[-1]
+            converted_path = src_path.replace(src_filename, "exc/" + src_filename)
+            return converted_path
+
+    @staticmethod
+    def _update_log_color_set(log_format: 'logging.Formatter', log_level: str, logger: 'BuiltinLogger'):
         coloredlogs.DEFAULT_FIELD_STYLES = {
             'hostname': {'color': 'magenta'},
             'programname': {'color': 'cyan'},
@@ -149,7 +283,7 @@ class Logger:
             'warning': {'color': 'yellow'}}
 
         coloredlogs.install(logger=logger,
-                            fmt=log_format,
+                            fmt=log_format._fmt,
                             datefmt="%m-%d %H:%M:%S",
                             level=log_level,
                             milliseconds=True)
@@ -168,24 +302,64 @@ class Logger:
 
     @staticmethod
     def debug(msg: Union[str, BaseException], tag: str = DEFAULT_LOG_TAG):
-        logging.debug(Logger.__make_log_msg(msg, tag))
+        logger = Logger._logger_mapper.get(Logger.DEFAULT_LOGGER)
+        if logger is None:
+            logging.debug(Logger._make_log_msg(msg, tag))
+        else:
+            logger.debug(Logger._make_log_msg(msg, tag))
 
     @staticmethod
     def info(msg: Union[str, BaseException], tag: str = DEFAULT_LOG_TAG):
-        logging.info(Logger.__make_log_msg(msg, tag))
+        logger = Logger._logger_mapper.get(Logger.DEFAULT_LOGGER)
+        if logger is None:
+            logging.info(Logger._make_log_msg(msg, tag))
+        else:
+            logger.info(Logger._make_log_msg(msg, tag))
 
     @staticmethod
     def warning(msg: Union[str, BaseException], tag: str = DEFAULT_LOG_TAG):
-        logging.warning(Logger.__make_log_msg(msg, tag))
+        logger = Logger._logger_mapper.get(Logger.DEFAULT_LOGGER)
+        if logger is None:
+            logging.warning(Logger._make_log_msg(msg, tag))
+        else:
+            logger.warning(Logger._make_log_msg(msg, tag))
 
     @staticmethod
     def error(msg: Union[str, BaseException], tag: str = DEFAULT_LOG_TAG):
-        logging.error(Logger.__make_log_msg(msg, tag))
+        logger = Logger._logger_mapper.get(Logger.DEFAULT_LOGGER)
+        if logger is None:
+            logging.error(Logger._make_log_msg(msg, tag))
+        else:
+            logger.error(Logger._make_log_msg(msg, tag))
 
     @staticmethod
     def exception(msg: Union[str, BaseException], tag: str = DEFAULT_LOG_TAG):
-        logging.exception(Logger.__make_log_msg(msg, tag), exc_info=True)
+        console_logger = Logger._logger_mapper.get(Logger.EXC_CONSOLE_LOGGER)
+        file_logger = Logger._logger_mapper.get(Logger.EXC_FILE_LOGGER)
+
+        is_root_enable = True
+        if console_logger is not None:
+            console_logger.exception(Logger._make_log_msg(msg, tag), exc_info=True)
+            is_root_enable = False
+        if file_logger is not None:
+            file_logger.exception(Logger._make_log_msg(msg, tag), exc_info=True)
+            is_root_enable = False
+        if is_root_enable:
+            logging.exception(Logger._make_log_msg(msg, tag), exc_info=True)
 
     @staticmethod
-    def __make_log_msg(msg: Union[str, BaseException], tag: str):
+    def _make_log_msg(msg: Union[str, BaseException], tag: str):
         return f'[{tag}] {msg}'
+
+    @staticmethod
+    def _convert_interval_key(config_key: str):
+        if config_key == 'daily':
+            return 'D'
+        elif config_key == 'weekly':
+            return 'W'
+        elif config_key == 'hourly':
+            return 'H'
+        elif config_key == 'minutely':
+            return 'M'
+        else:
+            return 'D'
