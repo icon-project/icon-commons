@@ -131,7 +131,7 @@ class Logger:
 
     @staticmethod
     def _apply_conf(conf: dict) -> None:
-        log_level = Logger.LogLevel[conf[Logger.LEVEL].upper()]
+        log_level = Logger.LogLevel[conf.get(Logger.LEVEL, 'info').upper()]
         formatter = logging.Formatter(conf[Logger.FORMAT])
         enable_color = conf.get(Logger.COLOR, False)
         log_file_path = conf.get(Logger.FILE_PATH, str())
