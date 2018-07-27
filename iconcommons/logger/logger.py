@@ -18,7 +18,7 @@ import coloredlogs
 
 from logging import Logger as BuiltinLogger, FileHandler
 from enum import IntFlag
-from typing import Union
+from typing import Union, Optional
 
 from iconcommons.icon_config import IconConfig
 from .icon_rotationg_file_handler import IconRotatingFileHandler, TimedRotatingFileHandler, RotatingFileHandler
@@ -75,7 +75,7 @@ class Logger:
     EXC_FILE_LOGGER = 'exc_file_logger'
 
     @staticmethod
-    def load_config(config: 'IconConfig' = None, config_path: str = None) -> None:
+    def load_config(config: 'IconConfig' = None, config_path: Optional[str] = None) -> None:
         if config is None:
             conf = IconConfig(config_path, default_log_config)
         else:
