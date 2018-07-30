@@ -37,12 +37,14 @@ class IconConfig(dict):
         if user_input:
             self.update({k: v for k, v in user_input.items() if v})
 
-    def _load(self, conf_path: Optional[str]) -> bool:
-        if conf_path is None:
-            return False
+    @staticmethod
+    def valid_conf_path(path: Optional[str]):
+        return os.path.exists(path)
 
-        if not os.path.exists(conf_path):
-            raise Exception(f'invalid conf_path: {conf_path}')
+    def _load(self, conf_path: Optional[str]) -> bool:
+        if not self.valid_conf_path(conf_path):
+            return False
+        
         with open(conf_path) as f:
             conf: dict = json.load(f)
             self.update_conf(conf)
