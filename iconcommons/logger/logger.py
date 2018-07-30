@@ -92,19 +92,21 @@ class Logger:
         Logger._update_other_logger_level('jsonrpcclient.client.request', Logger.LogLevel.WARNING.value)
         Logger._update_other_logger_level('jsonrpcclient.client.response', Logger.LogLevel.WARNING.value)
 
-        Logger.info(f'====================LOG CONFIG====================')
-        Logger.print_config(conf)
-        Logger.info(f'====================LOG CONFIG====================')
-
     @staticmethod
     def print_config(conf: dict, prefix: str = 'CONFIG'):
+        Logger.info(f'====================LOG CONFIG {prefix}====================')
+        Logger._print_config(conf, prefix)
+        Logger.info(f'====================LOG CONFIG {prefix}====================')
+
+    @staticmethod
+    def _print_config(conf: dict, prefix: str = 'CONFIG'):
         for key, value in conf.items():
             if not isinstance(value, dict):
                 tmp_prefix = '{}.{}'.format(prefix, key)
                 Logger.info(f'[LOG CONFIG] [{tmp_prefix}] > {value}')
             else:
                 tmp_prefix = '{}.{}'.format(prefix, key)
-                Logger.print_config(value, tmp_prefix)
+                Logger._print_config(value, tmp_prefix)
 
     @staticmethod
     def _update_logger(conf: dict):
