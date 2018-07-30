@@ -48,9 +48,10 @@ default_icon_config = {
 class TestLogger(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.conf = IconConfig(None, default_icon_config)
+        cls.conf = IconConfig(str(), default_icon_config)
         cls.conf.load()
         Logger.load_config(cls.conf)
+        Logger.print_config(cls.conf, 'test')
 
         file_path = os.path.join(os.path.dirname(__file__), 'logger_old.json')
         cls.conf = IconConfig(file_path, default_icon_config)
