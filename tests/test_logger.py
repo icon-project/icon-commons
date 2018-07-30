@@ -19,23 +19,52 @@
 import unittest
 import os.path
 
+from logging import Logger as builtin_logger
+
 from iconcommons.icon_config import IconConfig
 from iconcommons.logger import Logger
+from iconcommons.logger.icon_rotationg_file_handler import IconRotatingFileHandler
 
 
 TAG = 'logger'
 
+default_icon_config = {
+    "log": {
+        "logger": "iconservice"
+    },
+    "scoreRootPath": ".score",
+    "stateDbRootPath": ".statedb",
+    "channel": "loopchain_default",
+    "amqpKey": "7100",
+    "amqpTarget": "127.0.0.1",
+    "builtinScoreOwner": "hxebf3a409845cd09dcb5af31ed5be5e34e2af9433",
+    "service": {
+        "fee": False,
+        "audit": False
+    }
+}
+
 
 class TestLogger(unittest.TestCase):
-    def setUp(self):
-        file_path = os.path.join(os.path.dirname(__file__), 'logger.json')
-        conf = IconConfig(file_path)
-        conf.load()
-        Logger.load_config(conf, file_path)
+    @classmethod
+    def setUpClass(cls):
+        cls.conf = IconConfig(None, default_icon_config)
+        cls.conf.load()
+        Logger.load_config(cls.conf)
 
-    def tearDown(self):
-        if os.path.exists('log.txt'):
-            os.remove('log.txt')
+        file_path = os.path.join(os.path.dirname(__file__), 'logger_old.json')
+        cls.conf = IconConfig(file_path, default_icon_config)
+        cls.conf.load()
+        Logger.load_config(cls.conf, file_path)
+
+        file_path = os.path.join(os.path.dirname(__file__), 'logger.json')
+        cls.conf = IconConfig(file_path, default_icon_config)
+        cls.conf.load()
+        Logger.load_config(cls.conf, file_path)
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
 
     def test_debug(self):
         Logger.debug('debug log')
@@ -49,9 +78,24 @@ class TestLogger(unittest.TestCase):
         Logger.warning('warning log')
         Logger.warning('warning log', TAG)
 
+    def test_exception(self):
+        Logger.exception('exception log')
+        Logger.exception('exception log', TAG)
+
     def test_error(self):
         Logger.error('error log')
         Logger.error('error log', TAG)
+
+    def test_config(self):
+        logger: builtin_logger = Logger._logger_mapper.get(Logger.DEFAULT_LOGGER)
+        self.assertEqual(logger.name, self.conf['log']['logger'])
+        log_str: str = self.conf['log']['level']
+        log_str = log_str.upper()
+        self.assertEqual(logger.level, Logger.LogLevel[log_str].value)
+        self.assertEqual(2, len(logger.handlers))
+        handler = logger.handlers[1]
+        if not isinstance(handler, IconRotatingFileHandler):
+            raise Exception
 
 
 if __name__ == '__main__':

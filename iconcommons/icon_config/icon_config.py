@@ -14,11 +14,12 @@
 # limitations under the License.
 import os
 import json
+from typing import Optional
 
 
 class IconConfig(dict):
 
-    def __init__(self, config_path: str, default_config: dict = None):
+    def __init__(self, config_path: Optional[str], default_config: dict = None):
         super().__init__()
 
         self._config_path = config_path
@@ -29,17 +30,35 @@ class IconConfig(dict):
     def load(self, user_input=None):
         if user_input is None:
             user_input = {}
-        for path in [user_input.get('config', ""), self._config_path]:
+        for path in [user_input.get('config'), self._config_path]:
             if path and self._load(path):
                 break
 
         if user_input:
             self.update({k: v for k, v in user_input.items() if v})
 
-    def _load(self, conf_path: str):
-        if not os.path.exists(conf_path):
+    def _load(self, conf_path: Optional[str]) -> bool:
+        if conf_path is None:
             return False
+
+        if not os.path.exists(conf_path):
+            raise Exception(f'invalid conf_path: {conf_path}')
         with open(conf_path) as f:
             conf: dict = json.load(f)
-            self.update(conf)
+            self.update_conf(conf)
             return True
+
+    def update_conf(self, conf: dict, src_conf: dict= None) -> None:
+        if src_conf is None:
+            src_conf = self
+
+        for key, value in conf.items():
+            if not isinstance(value, dict):
+                src_conf[key] = conf[key]
+            else:
+                src_dict = src_conf.get(key)
+                conf_dict = conf.get(key, {})
+                if src_dict is None:
+                    src_conf[key] = conf_dict
+                else:
+                    self.update_conf(conf_dict, src_conf[key])
