@@ -14,12 +14,11 @@
 # limitations under the License.
 import os
 import json
-from typing import Optional
 
 
 class IconConfig(dict):
 
-    def __init__(self, config_path: Optional[str], default_config: dict = None):
+    def __init__(self, config_path: str, default_config: dict = None):
         super().__init__()
 
         self._config_path = config_path
@@ -38,10 +37,10 @@ class IconConfig(dict):
             self.update({k: v for k, v in user_input.items() if v})
 
     @staticmethod
-    def valid_conf_path(path: Optional[str]):
+    def valid_conf_path(path: str):
         return os.path.exists(path)
 
-    def _load(self, conf_path: Optional[str]) -> bool:
+    def _load(self, conf_path: str) -> bool:
         if not self.valid_conf_path(conf_path):
             return False
         
