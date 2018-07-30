@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+HOST="tbears.icon.foundation"
+S3_HOST="${HOST}.s3-website.ap-northeast-2.amazonaws.com"
+PRODUCT="iconcommons"
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
 PYVER=$(python -c 'import sys; print(sys.version_info[0])')
 if [[ PYVER -ne 3 ]];then
   echo "The script should be run on python3"
@@ -27,9 +32,12 @@ if [[ ("$1" = "test" && "$2" != "--ignore-test") || ("$1" = "build") || ("$1" = 
         exit 1
       fi
 
+      S3_URL="s3://${HOST}/${BRANCH}/${PRODUCT}/"
+      echo "$S3_URL"
+
       pip install awscli
-      aws s3 cp VERSION s3://tbears.icon.foundation/iconcommons/ --acl public-read
-      aws s3 cp dist/*$VER*.whl s3://tbears.icon.foundation/iconcommons/ --acl public-read
+      aws s3 cp VERSION "$S3_URL" --acl public-read
+      aws s3 cp dist/*$VER*.whl "$S3_URL" --acl public-read
 
     fi
   fi
