@@ -93,7 +93,7 @@ class Logger:
         Logger._update_other_logger_level('jsonrpcclient.client.response', Logger.LogLevel.WARNING.value)
 
     @staticmethod
-    def print_config(conf: dict, tag: str = 'CONFIG'):
+    def print_config(conf: dict, tag: str = DEFAULT_LOG_TAG):
         Logger.info(f'====================LOG CONFIG====================', tag)
         Logger._print_config(conf, "", tag)
         Logger.info(f'====================LOG CONFIG====================', tag)
