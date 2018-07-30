@@ -95,7 +95,7 @@ class Logger:
     @staticmethod
     def print_config(conf: dict, tag: str = DEFAULT_LOG_TAG):
         Logger.info(f'====================LOG CONFIG====================', tag)
-        Logger._print_config(conf, "", tag)
+        Logger._print_config(conf, "CONFIG", tag)
         Logger.info(f'====================LOG CONFIG====================', tag)
 
     @staticmethod
@@ -103,7 +103,7 @@ class Logger:
         for key, value in conf.items():
             if not isinstance(value, dict):
                 tmp_prefix = '{}.{}'.format(prefix, key)
-                Logger.info(f'[LOG CONFIG] [{tmp_prefix}] > {value}', tag)
+                Logger.info(f'[{tmp_prefix}] > {value}', tag)
             else:
                 tmp_prefix = '{}.{}'.format(prefix, key)
                 Logger._print_config(value, tmp_prefix, tag)
