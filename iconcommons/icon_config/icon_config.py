@@ -50,7 +50,8 @@ class IconConfig(dict):
 
         for key, value in conf.items():
             if not isinstance(value, dict):
-                src_conf[key] = conf[key]
+                if value is not None:
+                    src_conf[key] = value
             else:
                 src_dict = src_conf.get(key)
                 conf_dict = conf.get(key, {})
