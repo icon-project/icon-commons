@@ -26,15 +26,10 @@ class IconConfig(dict):
         if default_config is not None:
             self.update(default_config)
 
-    def load(self, user_input=None):
-        if user_input is None:
-            user_input = {}
-        for path in [user_input.get('config'), self._config_path]:
+    def load(self, config_path: str = None):
+        for path in [config_path, self._config_path]:
             if path and self._load(path):
                 break
-
-        if user_input:
-            self.update({k: v for k, v in user_input.items() if v})
 
     @staticmethod
     def valid_conf_path(path: str):
