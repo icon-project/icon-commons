@@ -86,12 +86,6 @@ class Logger:
         Logger._init_logger(log_conf[Logger.LOGGER_NAME])
         Logger._update_logger(log_conf)
 
-        Logger._update_other_logger_level('pika', Logger.LogLevel.WARNING.value)
-        Logger._update_other_logger_level('aio_pika', Logger.LogLevel.WARNING.value)
-        Logger._update_other_logger_level('sanic.access', Logger.LogLevel.WARNING.value)
-        Logger._update_other_logger_level('jsonrpcclient.client.request', Logger.LogLevel.WARNING.value)
-        Logger._update_other_logger_level('jsonrpcclient.client.response', Logger.LogLevel.WARNING.value)
-
     @staticmethod
     def print_config(conf: dict, tag: str = DEFAULT_LOG_TAG):
         Logger.info(f'====================LOG CONFIG====================', tag)
@@ -295,12 +289,6 @@ class Logger:
                             datefmt="%m-%d %H:%M:%S",
                             level=log_level,
                             milliseconds=True)
-
-    @staticmethod
-    def _update_other_logger_level(logger_name: str, log_level: int):
-        logger = logging.getLogger(logger_name)
-        if logger is not None:
-            logger.setLevel(log_level)
 
     @staticmethod
     def _ensure_dir(file_path):
