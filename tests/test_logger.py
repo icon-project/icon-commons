@@ -67,6 +67,10 @@ class TestLogger(unittest.TestCase):
     def tearDownClass(cls):
         pass
 
+    def test_get_logger_level(self):
+        level_name = Logger.get_logger_level("")
+        self.assertEqual(level_name, "WARNING")
+
     def test_debug(self):
         Logger.debug('debug log')
         Logger.debug('debug log', TAG)

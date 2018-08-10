@@ -93,6 +93,11 @@ class Logger:
         Logger.info(f'====================LOG CONFIG====================', tag)
 
     @staticmethod
+    def get_logger_level(logger_name: str) -> str:
+        logger = logging.getLogger(logger_name)
+        return logging.getLevelName(logger.level)
+
+    @staticmethod
     def _print_config(conf: dict, prefix: str, tag: str):
         for key, value in conf.items():
             if not isinstance(value, dict):
