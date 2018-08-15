@@ -159,12 +159,12 @@ class Logger:
                 for output in outputs:
                     rotate_type |= Logger.LogRotateType[output.upper()]
 
-                rotate_period = Logger._convert_interval_key(rotation_conf[Logger.ROTATE_PERIOD])
-                rotate_interval = rotation_conf[Logger.ROTATE_INTERVAL]
-                rotate_max_bytes = rotation_conf[Logger.ROTATE_MAX_BYTES]
-                backup_count = rotation_conf[Logger.ROTATE_BACKUP_COUNT]
-
                 if Logger._is_flag_on(rotate_type, Logger.LogRotateType.BOTH):
+                    rotate_period = Logger._convert_interval_key(rotation_conf[Logger.ROTATE_PERIOD])
+                    rotate_interval = rotation_conf[Logger.ROTATE_INTERVAL]
+                    rotate_max_bytes = rotation_conf[Logger.ROTATE_MAX_BYTES]
+                    backup_count = rotation_conf[Logger.ROTATE_BACKUP_COUNT]
+
                     Logger._apply_icon_rotate_file_logger(
                         Logger.DEFAULT_LOGGER, log_file_path, rotate_period, rotate_interval,
                         rotate_max_bytes, backup_count, formatter)
@@ -172,11 +172,18 @@ class Logger:
                         Logger.EXC_FILE_LOGGER, log_file_path, rotate_period, rotate_interval,
                         rotate_max_bytes, backup_count, formatter)
                 elif Logger._is_flag_on(rotate_type, Logger.LogRotateType.PERIOD):
+                    rotate_period = Logger._convert_interval_key(rotation_conf[Logger.ROTATE_PERIOD])
+                    rotate_interval = rotation_conf[Logger.ROTATE_INTERVAL]
+                    backup_count = rotation_conf[Logger.ROTATE_BACKUP_COUNT]
+
                     Logger._apply_time_rotate_file_logger(
                         Logger.DEFAULT_LOGGER, log_file_path, rotate_period, rotate_interval, backup_count, formatter)
                     Logger._apply_time_rotate_file_logger(
                         Logger.EXC_FILE_LOGGER, log_file_path, rotate_period, rotate_interval, backup_count, formatter)
                 elif Logger._is_flag_on(rotate_type, Logger.LogRotateType.BYTES):
+                    rotate_max_bytes = rotation_conf[Logger.ROTATE_MAX_BYTES]
+                    backup_count = rotation_conf[Logger.ROTATE_BACKUP_COUNT]
+
                     Logger._apply_rotate_file_logger(
                         Logger.DEFAULT_LOGGER, log_file_path, rotate_max_bytes, backup_count, formatter)
                     Logger._apply_rotate_file_logger(
