@@ -25,12 +25,20 @@ from iconcommons.icon_config import IconConfig
 from iconcommons.logger import Logger
 from iconcommons.logger.icon_rotationg_file_handler import IconRotatingFileHandler
 
-
 TAG = 'logger'
 
 default_icon_config = {
     "log": {
-        "logger": "iconservice"
+        "logger": "iconservice",
+        "colorLog": True,
+        "level": "info",
+        "filePath": "./log/iconservice.log",
+        "outputType": "console|file",
+        "rotate": {
+            "type": "bytes",
+            "backupCount": 10,
+            "maxBytes": 10485760
+        }
     },
     "scoreRootPath": ".score",
     "stateDbRootPath": ".statedb",
@@ -66,6 +74,10 @@ class TestLogger(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         pass
+
+    def test_get_logger_level(self):
+        level_name = Logger.get_logger_level("")
+        self.assertEqual(level_name, "WARNING")
 
     def test_debug(self):
         Logger.debug('debug log')
