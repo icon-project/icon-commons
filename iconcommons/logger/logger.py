@@ -14,6 +14,10 @@
 
 import os
 import logging
+import sys
+import traceback
+from functools import partial
+
 import coloredlogs
 
 from logging import Logger as BuiltinLogger, FileHandler
@@ -144,13 +148,13 @@ class Logger:
         for output in outputs:
             handler_type |= Logger.LogHandlerType[output.upper()]
 
-        if Logger._is_flag_on(handler_type, Logger.LogHandlerType.CONSOLE):
+        if Logger.is_flag_on(handler_type, Logger.LogHandlerType.CONSOLE):
             handler = logging.StreamHandler()
             handler.setFormatter(formatter)
             Logger._apply_console_logger(Logger.DEFAULT_LOGGER, handler, enable_color, formatter, log_level)
             Logger._apply_console_logger(Logger.EXC_CONSOLE_LOGGER, handler, enable_color, formatter, log_level)
 
-        if Logger._is_flag_on(handler_type, Logger.LogHandlerType.FILE):
+        if Logger.is_flag_on(handler_type, Logger.LogHandlerType.FILE):
             rotation_conf: dict = conf.get(Logger.ROTATE)
             if rotation_conf is not None:
                 rotate_type = Logger.LogRotateType.NONE
@@ -159,7 +163,7 @@ class Logger:
                 for output in outputs:
                     rotate_type |= Logger.LogRotateType[output.upper()]
 
-                if Logger._is_flag_on(rotate_type, Logger.LogRotateType.BOTH):
+                if Logger.is_flag_on(rotate_type, Logger.LogRotateType.BOTH):
                     rotate_period = Logger._convert_interval_key(rotation_conf[Logger.ROTATE_PERIOD])
                     rotate_interval = rotation_conf[Logger.ROTATE_INTERVAL]
                     rotate_max_bytes = rotation_conf[Logger.ROTATE_MAX_BYTES]
@@ -171,7 +175,7 @@ class Logger:
                     Logger._apply_icon_rotate_file_logger(
                         Logger.EXC_FILE_LOGGER, log_file_path, rotate_period, rotate_interval,
                         rotate_max_bytes, backup_count, formatter, log_level)
-                elif Logger._is_flag_on(rotate_type, Logger.LogRotateType.PERIOD):
+                elif Logger.is_flag_on(rotate_type, Logger.LogRotateType.PERIOD):
                     rotate_period = Logger._convert_interval_key(rotation_conf[Logger.ROTATE_PERIOD])
                     rotate_interval = rotation_conf[Logger.ROTATE_INTERVAL]
                     backup_count = rotation_conf[Logger.ROTATE_BACKUP_COUNT]
@@ -182,7 +186,7 @@ class Logger:
                     Logger._apply_time_rotate_file_logger(
                         Logger.EXC_FILE_LOGGER, log_file_path, rotate_period, rotate_interval,
                         backup_count, formatter, log_level)
-                elif Logger._is_flag_on(rotate_type, Logger.LogRotateType.BYTES):
+                elif Logger.is_flag_on(rotate_type, Logger.LogRotateType.BYTES):
                     rotate_max_bytes = rotation_conf[Logger.ROTATE_MAX_BYTES]
                     backup_count = rotation_conf[Logger.ROTATE_BACKUP_COUNT]
 
@@ -193,8 +197,17 @@ class Logger:
             else:
                 Logger._apply_file_logger(Logger.DEFAULT_LOGGER, log_file_path, formatter, log_level)
 
+        Logger._apply_exc_hook(handler_type)
+
     @staticmethod
-    def _is_flag_on(src_flag: int, dest_flag: int) -> bool:
+    def _apply_exc_hook(handler_type: int):
+        logger = Logger._logger_mapper[Logger.EXC_FILE_LOGGER]
+        filehandler = logger.handlers[0]
+        sys.excepthook = partial(new_excepthook, file_handler=filehandler, handler_type=handler_type)
+        traceback.print_exception = partial(new_print_exception, file_handler=filehandler, handler_type=handler_type)
+
+    @staticmethod
+    def is_flag_on(src_flag: int, dest_flag: int) -> bool:
         return src_flag & dest_flag == dest_flag
 
     @staticmethod
@@ -377,3 +390,20 @@ class Logger:
             return 'M'
         else:
             return 'D'
+
+
+tb_print_exception = traceback.print_exception
+
+
+def new_print_exception(etype, value, tb, limit=None, file=None, chain=True,
+                        file_handler=None,
+                        handler_type=Logger.LogHandlerType.NONE):
+    if Logger.is_flag_on(handler_type, Logger.LogHandlerType.CONSOLE):
+        tb_print_exception(etype, value, tb, limit=limit, file=None, chain=chain)
+    if Logger.is_flag_on(handler_type, Logger.LogHandlerType.FILE):
+        with open(file_handler.baseFilename, file_handler.mode) as hook:
+            tb_print_exception(etype, value, tb, limit=limit, file=hook, chain=chain)
+
+
+def new_excepthook(exc_type, exc_value, tb, file_handler, handler_type):
+    new_print_exception(exc_type, exc_value, tb, file_handler=file_handler, handler_type=handler_type)
