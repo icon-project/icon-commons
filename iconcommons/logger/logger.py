@@ -196,6 +196,7 @@ class Logger:
                         Logger.EXC_FILE_LOGGER, log_file_path, rotate_max_bytes, backup_count, formatter, log_level)
             else:
                 Logger._apply_file_logger(Logger.DEFAULT_LOGGER, log_file_path, formatter, log_level)
+                Logger._apply_file_logger(Logger.EXC_FILE_LOGGER, log_file_path, formatter, log_level)
 
         Logger._apply_exc_hook(handler_type)
 
@@ -401,8 +402,9 @@ def new_print_exception(etype, value, tb, limit=None, file=None, chain=True,
     if Logger.is_flag_on(handler_type, Logger.LogHandlerType.CONSOLE):
         tb_print_exception(etype, value, tb, limit=limit, file=None, chain=chain)
     if Logger.is_flag_on(handler_type, Logger.LogHandlerType.FILE):
-        with open(file_handler.baseFilename, file_handler.mode) as hook:
-            tb_print_exception(etype, value, tb, limit=limit, file=hook, chain=chain)
+        file_handler.acquire()
+        tb_print_exception(etype, value, tb, limit=limit, file=file_handler.stream, chain=chain)
+        file_handler.release()
 
 
 def new_excepthook(exc_type, exc_value, tb, file_handler, handler_type):
