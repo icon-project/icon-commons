@@ -18,6 +18,7 @@ setup_options = {
     'version': version,
     'description': 'icon commmons package for python',
     'author': 'ICON foundation',
+    'author_email': 'foo@icon.foundation',
     'packages': find_packages(exclude=['tests*', 'docs']),
     'license': "Apache License 2.0",
     'install_requires': requires,
