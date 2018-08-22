@@ -14,7 +14,7 @@ if version is None:
 		version = version_file.read().strip()
 
 setup_options = {
-    'name': 'icon-commons',
+    'name': 'iconcommons',
     'version': version,
     'description': 'ICON commmon package for python',
     'long_description': open('README.md').read(),

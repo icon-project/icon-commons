@@ -30,7 +30,7 @@ ICON Commons development and execution requires following environments.
 
 ```bash
 # Install the ICON Commons
-$ pip install icon-commons
+$ pip install iconcommons
 ```
 
 ## Reference
