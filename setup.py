@@ -14,10 +14,12 @@ if version is None:
 		version = version_file.read().strip()
 
 setup_options = {
-    'name': 'iconcommons',
+    'name': 'icon-commons',
     'version': version,
-    'description': 'icon commmons package for python',
-    'author': 'ICON foundation',
+    'description': 'ICON commmon package for python',
+    'long_description': open('README.md').read(),
+    'long_description_content_type': 'text/markdown',
+    'author': 'ICON Foundation',
     'author_email': 'foo@icon.foundation',
     'packages': find_packages(exclude=['tests*', 'docs']),
     'license': "Apache License 2.0",
