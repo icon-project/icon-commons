@@ -12,15 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-import re
 
 import time
 from logging.handlers import BaseRotatingHandler
+from iconcommons.logger.logger_utils import suffix, extMatch
 
 
 class IconBytesFileHandler(BaseRotatingHandler):
-    suffix = "%Y-%m-%d_%H-%M-%S"
-    extMatch = r"^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}(\.\w+)?$"
+    suffix = suffix
+    extMatch = extMatch
 
     def __init__(self, filename, mode='a', maxBytes=0, backupCount=0, encoding=None, delay=False):
 
@@ -31,7 +31,6 @@ class IconBytesFileHandler(BaseRotatingHandler):
 
         self.maxBytes = maxBytes
         self.backupCount = backupCount
-        self.extMatch = re.compile(self.extMatch, re.ASCII)
         self.rotator = self.custom_rotator
         self.logger_index = 0
 

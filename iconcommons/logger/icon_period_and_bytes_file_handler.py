@@ -11,13 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import time
 from .icon_bytes_file_handler import IconBytesFileHandler
 from .icon_period_file_handler import IconPeriodFileHandler
+from iconcommons.logger.logger_utils import suffix, extMatch
 
 
 class IconPeriodAndBytesFileHandler(IconPeriodFileHandler, IconBytesFileHandler):
+    suffix = suffix
+    extMatch = extMatch
+
     def __init__(self, filename, mode='a', maxBytes=0, backupCount=0,
                  encoding=None, delay=0, when='h', interval=1, utc=False):
         IconPeriodFileHandler.__init__(

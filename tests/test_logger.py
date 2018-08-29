@@ -23,7 +23,7 @@ from logging import Logger as builtin_logger
 
 from iconcommons.icon_config import IconConfig
 from iconcommons.logger import Logger
-from iconcommons.logger.icon_rotationg_file_handler import IconPeriodAndBytesFileHandler
+from iconcommons.logger.icon_period_and_bytes_file_handler import IconPeriodAndBytesFileHandler
 
 TAG = 'logger'
 
