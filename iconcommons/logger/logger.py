@@ -21,7 +21,9 @@ from enum import IntFlag
 from typing import Union, Optional
 
 from iconcommons.icon_config import IconConfig
-from .icon_rotationg_file_handler import IconRotatingFileHandler, TimedRotatingFileHandler, RotatingFileHandler
+from .icon_period_and_bytes_file_handler import IconPeriodAndBytesFileHandler
+from .icon_period_file_handler import IconPeriodFileHandler
+from .icon_bytes_file_handler import IconBytesFileHandler
 
 
 default_log_config = {
@@ -233,9 +235,9 @@ class Logger:
                                        level: str):
         file_path = Logger._make_log_path(logger_type, file_path)
         Logger._ensure_dir(file_path)
-        handler = IconRotatingFileHandler(file_path, maxBytes=max_bytes,
-                                          when=when, interval=interval,
-                                          backupCount=backup_count)
+        handler = IconPeriodAndBytesFileHandler(file_path, maxBytes=max_bytes,
+                                                when=when, interval=interval,
+                                                backupCount=backup_count)
         handler.setFormatter(fmt)
         logger = Logger._logger_mapper[logger_type]
         logger.addHandler(handler)
@@ -251,8 +253,7 @@ class Logger:
                                        level: str):
         file_path = Logger._make_log_path(logger_type, file_path)
         Logger._ensure_dir(file_path)
-        handler = TimedRotatingFileHandler(file_path,
-                                           when=when, interval=interval, backupCount=backup_count)
+        handler = IconPeriodFileHandler(file_path, when=when, interval=interval, backupCount=backup_count)
         handler.setFormatter(fmt)
         logger = Logger._logger_mapper[logger_type]
         logger.addHandler(handler)
@@ -267,7 +268,7 @@ class Logger:
                                   level: str):
         file_path = Logger._make_log_path(logger_type, file_path)
         Logger._ensure_dir(file_path)
-        handler = RotatingFileHandler(file_path, maxBytes=max_bytes, backupCount=backup_count)
+        handler = IconBytesFileHandler(file_path, maxBytes=max_bytes, backupCount=backup_count)
         handler.setFormatter(fmt)
         logger = Logger._logger_mapper[logger_type]
         logger.addHandler(handler)
