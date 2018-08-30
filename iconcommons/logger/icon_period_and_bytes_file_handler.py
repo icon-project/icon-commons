@@ -11,23 +11,27 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import time
-from logging.handlers import TimedRotatingFileHandler, RotatingFileHandler
+from .icon_bytes_file_handler import IconBytesFileHandler
+from .icon_period_file_handler import IconPeriodFileHandler
+from iconcommons.logger.logger_utils import suffix, extMatch
 
 
-class IconRotatingFileHandler(TimedRotatingFileHandler, RotatingFileHandler):
+class IconPeriodAndBytesFileHandler(IconPeriodFileHandler, IconBytesFileHandler):
+    suffix = suffix
+    extMatch = extMatch
+
     def __init__(self, filename, mode='a', maxBytes=0, backupCount=0,
                  encoding=None, delay=0, when='h', interval=1, utc=False):
-        TimedRotatingFileHandler.__init__(
+        IconPeriodFileHandler.__init__(
             self, filename=filename, when=when, interval=interval,
             backupCount=backupCount, encoding=encoding, delay=delay, utc=utc)
 
-        RotatingFileHandler.__init__(self, filename=filename, mode=mode, maxBytes=maxBytes,
-                                     backupCount=backupCount, encoding=encoding, delay=delay)
+        IconBytesFileHandler.__init__(self, filename=filename, mode=mode, maxBytes=maxBytes,
+                                      backupCount=backupCount, encoding=encoding, delay=delay)
 
     def computeRollover(self, current_time):
-        return TimedRotatingFileHandler.computeRollover(self, current_time)
+        return IconPeriodFileHandler.computeRollover(self, current_time)
 
     def doRollover(self):
         # get from logging.handlers.TimedRotatingFileHandler.doRollover()
@@ -49,7 +53,7 @@ class IconRotatingFileHandler(TimedRotatingFileHandler, RotatingFileHandler):
                 new_rollover_at += addend
         self.rolloverAt = new_rollover_at
 
-        return RotatingFileHandler.doRollover(self)
+        return IconBytesFileHandler.doRollover(self)
 
     def shouldRollover(self, record):
-        return TimedRotatingFileHandler.shouldRollover(self, record) or RotatingFileHandler.shouldRollover(self, record)
+        return IconPeriodFileHandler.shouldRollover(self, record) or IconBytesFileHandler.shouldRollover(self, record)

@@ -23,7 +23,7 @@ from logging import Logger as builtin_logger
 
 from iconcommons.icon_config import IconConfig
 from iconcommons.logger import Logger
-from iconcommons.logger.icon_rotationg_file_handler import IconRotatingFileHandler
+from iconcommons.logger.icon_period_and_bytes_file_handler import IconPeriodAndBytesFileHandler
 
 TAG = 'logger'
 
@@ -60,11 +60,6 @@ class TestLogger(unittest.TestCase):
         cls.conf.load()
         Logger.load_config(cls.conf)
         Logger.print_config(cls.conf, 'test')
-
-        file_path = os.path.join(os.path.dirname(__file__), 'logger_old.json')
-        cls.conf = IconConfig(file_path, default_icon_config)
-        cls.conf.load()
-        Logger.load_config(cls.conf, file_path)
 
         file_path = os.path.join(os.path.dirname(__file__), 'logger.json')
         cls.conf = IconConfig(file_path, default_icon_config)
@@ -107,7 +102,7 @@ class TestLogger(unittest.TestCase):
         self.assertEqual(logger.level, Logger.LogLevel[log_str].value)
         self.assertEqual(2, len(logger.handlers))
         handler = logger.handlers[1]
-        if not isinstance(handler, IconRotatingFileHandler):
+        if not isinstance(handler, IconPeriodAndBytesFileHandler):
             raise Exception
 
 
