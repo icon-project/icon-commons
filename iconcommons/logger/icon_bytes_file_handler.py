@@ -27,7 +27,7 @@ class IconBytesFileHandler(BaseRotatingHandler):
         if maxBytes > 0:
             mode = 'a'
 
-        super().__init__(filename, mode, encoding, delay)
+        BaseRotatingHandler.__init__(self, filename, mode, encoding, delay)
 
         self.maxBytes = maxBytes
         self.backupCount = backupCount
