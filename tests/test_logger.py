@@ -16,9 +16,8 @@
 # limitations under the License.
 
 
-import unittest
 import os.path
-
+import unittest
 from logging import Logger as builtin_logger
 
 from iconcommons.icon_config import IconConfig

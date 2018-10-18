@@ -17,9 +17,9 @@ import types
 from logging.handlers import BaseRotatingHandler
 from stat import ST_MTIME
 
+from iconcommons.logger.logger_utils import suffix, extMatch
 from .icon_bytes_file_handler import IconBytesFileHandler
 from .icon_period_file_handler import IconPeriodFileHandler
-from iconcommons.logger.logger_utils import suffix, extMatch
 
 
 class IconPeriodAndBytesFileHandler(BaseRotatingHandler):

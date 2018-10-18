@@ -12,23 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import logging
+import os
 import sys
 import traceback
+from enum import IntFlag
 from functools import partial
+from logging import Logger as BuiltinLogger, FileHandler
+from typing import Union, Optional
 
 import coloredlogs
 
-from logging import Logger as BuiltinLogger, FileHandler
-from enum import IntFlag
-from typing import Union, Optional
-
 from iconcommons.icon_config import IconConfig
+from .icon_bytes_file_handler import IconBytesFileHandler
 from .icon_period_and_bytes_file_handler import IconPeriodAndBytesFileHandler
 from .icon_period_file_handler import IconPeriodFileHandler
-from .icon_bytes_file_handler import IconBytesFileHandler
-
 
 default_log_config = {
     "log": {
