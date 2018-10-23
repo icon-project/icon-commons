@@ -34,12 +34,15 @@ class IconPeriodAndBytesFileHandler(BaseRotatingHandler):
         self.when = when.upper()
         self.interval = interval
         self.utc = utc
+        self.atTime = None
+        self.logger_index = 0
 
         self.computeRollover = types.MethodType(IconPeriodFileHandler.computeRollover, self)
         self.doRollover_bytes = types.MethodType(IconBytesFileHandler.doRollover, self)
         self.getFilesToDelete = types.MethodType(IconBytesFileHandler.getFilesToDelete, self)
         self.shouldRollover_period = types.MethodType(IconPeriodFileHandler.shouldRollover, self)
         self.shouldRollover_bytes = types.MethodType(IconBytesFileHandler.shouldRollover, self)
+        self.rotator = types.MethodType(IconBytesFileHandler.custom_rotator, self)
 
         if self.when == 'S':
             self.interval = 1 # one second
