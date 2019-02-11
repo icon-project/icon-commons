@@ -23,11 +23,7 @@ ICON Commons development and execution requires following environments.
 - OS: MacOS, Linux
   - Windows are not supported yet.
 - Python
-  - Make Virtual Env for Python 3.6.5+ (recommended version, 3.7 is not supported)
-  - check your python version
-    ```bash
-    $ python3 -V
-    ```
+  - Version: python 3.6.x
   - IDE: Pycharm is recommended.
 
 ### Setup on MacOS / Linux
