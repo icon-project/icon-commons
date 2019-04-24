@@ -6,12 +6,13 @@ from setuptools import setup, find_packages
 requires = [
     'coloredlogs==10.0',
 ]
-
+data_requires = [
+    'VERSION',
+]
 version = os.environ.get('VERSION')
-
 if version is None:
-	with open(os.path.join('.', 'VERSION')) as version_file:
-		version = version_file.read().strip()
+    with open(os.path.join('.', 'VERSION')) as version_file:
+        version = version_file.read().strip()
 
 setup_options = {
     'name': 'iconcommons',
@@ -27,6 +28,7 @@ setup_options = {
     'install_requires': requires,
     'setup_requires': ['pytest-runner'],
     'tests_requires': ['pytest'],
+    'data_files': [('', data_requires)],
     'classifiers': [
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers', 
