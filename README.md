@@ -1,36 +1,43 @@
 # ICON Commons
 
-ICON Commons is a utility project which is used for running T-Bears and ICON Service. this project provides configuration data setting and log setting.  
+ICON Commons is a utility project which is used for running T-Bears and ICON Service.
+This project provides some utility classes for setting configuration data and logging.
 
-## Building source code
- First, clone this project. Then go to the project folder and create a user environment and run build script.
+## Building from Source
+After checking out the source code, create a virtual environment and run the build script in the source directory as follows.
 ```
-$ virtualenv -p python3 venv  # Create a virtual environment.
-$ source venv/bin/activate    # Enter the virtual environment.
-(venv)$ ./build.sh            # run build script
-(venv)$ ls dist/              # check result wheel file
-iconcommons-1.0.1-py3-none-any.whl
+$ virtualenv -p python3 venv  # create a virtual environment
+$ source venv/bin/activate    # switch to the virtual environment
+(venv) $ ./build.sh           # run the build script
+(venv) $ ls dist/             # check the generated wheel file
+iconcommons-1.0.5-py3-none-any.whl
 ```
 
 ## Installation
 
-This chapter will explain how to install ICON Commons on your T-Bears or ICON Service. 
+Basically you can install ICON Commons package by using `pip3` command on your local environment.
 
 ### Requirements
 
-ICON Commons development and execution requires following environments.
+ICON Commons package requires the following environments.
 
 - OS: MacOS, Linux
-  - Windows are not supported yet.
-- Python
-  - Version: python 3.6.x
-  - IDE: Pycharm is recommended.
 
-### Setup on MacOS / Linux
+  - Windows is not supported
+- Python
+  - Make a virtual environment for Python 3.6.5+
+  - Check your Python version
+    ```bash
+    $ python3 -V
+    Python 3.6.7
+    ```
+  - IDE: PyCharm is recommended.
+
+### Installing on MacOS / Linux
 
 ```bash
-# Install the ICON Commons
-$ pip install iconcommons
+# install the ICON Commons
+(venv) $ pip3 install iconcommons
 ```
 
 ## Reference
