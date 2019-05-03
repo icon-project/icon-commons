@@ -14,23 +14,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
+import os
 import unittest
-import os.path
-
-from logging import Logger as builtin_logger
 
 from iconcommons.icon_config import IconConfig
-from iconcommons.logger import Logger
-from iconcommons.logger.icon_period_and_bytes_file_handler import IconPeriodAndBytesFileHandler
+from iconcommons.logger import icon_logger, IconLoggerUtil, Logger
 
 TAG = 'logger'
 
 default_icon_config = {
     "log": {
         "logger": "iconservice",
-        "colorLog": True,
         "level": "info",
         "filePath": "./log/iconservice.log",
         "outputType": "console|file",
@@ -56,54 +50,83 @@ default_icon_config = {
 class TestLogger(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.conf = IconConfig(str(), default_icon_config)
-        cls.conf.load()
-        Logger.load_config(cls.conf)
-        Logger.print_config(cls.conf, 'test')
+        conf = IconConfig(str(), default_icon_config)
+        conf.load()
+        IconLoggerUtil.apply_config(icon_logger, conf)
+        IconLoggerUtil.print_config(icon_logger, conf)
 
         file_path = os.path.join(os.path.dirname(__file__), 'logger.json')
-        cls.conf = IconConfig(file_path, default_icon_config)
-        cls.conf.load()
-        Logger.load_config(cls.conf, file_path)
+        conf = IconConfig(file_path, default_icon_config)
+        conf.load()
+        IconLoggerUtil.apply_config(icon_logger, conf)
+        IconLoggerUtil.print_config(icon_logger, conf)
 
     @classmethod
     def tearDownClass(cls):
         pass
 
-    def test_get_logger_level(self):
-        level_name = Logger.get_logger_level("")
-        self.assertEqual(level_name, "WARNING")
-
     def test_debug(self):
-        Logger.debug('debug log')
-        Logger.debug('debug log', TAG)
+        icon_logger.debug(IconLoggerUtil.make_log_msg(TAG, 'debug log'))
 
     def test_info(self):
-        Logger.info('info log')
-        Logger.info('info log', TAG)
+        icon_logger.info(IconLoggerUtil.make_log_msg(TAG, 'info log'))
 
     def test_warning(self):
-        Logger.warning('warning log')
-        Logger.warning('warning log', TAG)
+        icon_logger.warning(IconLoggerUtil.make_log_msg(TAG, 'warning log'))
 
     def test_exception(self):
-        Logger.exception('exception log')
-        Logger.exception('exception log', TAG)
+        try:
+            raise Exception()
+        except:
+            icon_logger.exception(IconLoggerUtil.make_log_msg(TAG, 'exception log'))
 
     def test_error(self):
-        Logger.error('error log')
-        Logger.error('error log', TAG)
+        icon_logger.error(IconLoggerUtil.make_log_msg(TAG, 'error log'))
 
-    def test_config(self):
-        logger: builtin_logger = Logger._logger_mapper.get(Logger.DEFAULT_LOGGER)
-        self.assertEqual(logger.name, self.conf['log']['logger'])
-        log_str: str = self.conf['log']['level']
-        log_str = log_str.upper()
-        self.assertEqual(logger.level, Logger.LogLevel[log_str].value)
-        self.assertEqual(2, len(logger.handlers))
-        handler = logger.handlers[1]
-        if not isinstance(handler, IconPeriodAndBytesFileHandler):
-            raise Exception
+    def test_many_debug(self):
+        for i in range(100):
+            icon_logger.debug(IconLoggerUtil.make_log_msg(TAG, f'debug log{i}'))
+
+
+class TestLoggerOld(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        conf = IconConfig(str(), default_icon_config)
+        conf.load()
+        Logger.load_config(conf)
+        Logger.print_config(conf, TAG)
+
+        file_path = os.path.join(os.path.dirname(__file__), 'logger.json')
+        conf = IconConfig(file_path, default_icon_config)
+        conf.load()
+        Logger.load_config(conf)
+        Logger.print_config(conf, TAG)
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
+    def test_debug(self):
+        Logger.debug(TAG, 'debug log')
+
+    def test_info(self):
+        Logger.info(TAG, 'info log')
+
+    def test_warning(self):
+        Logger.warning(TAG, 'warning log')
+
+    def test_exception(self):
+        try:
+            raise Exception()
+        except:
+            Logger.exception(TAG, 'exception log')
+
+    def test_error(self):
+        Logger.error(TAG, 'error log')
+
+    def test_many_debug(self):
+        for i in range(100):
+            Logger.debug(TAG, f'debug log{i}')
 
 
 if __name__ == '__main__':

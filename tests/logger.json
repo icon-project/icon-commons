@@ -1,7 +1,6 @@
 {
 	"log": {
         "logger": "test",
-		"colorLog": true,
 		"level": "debug",
 		"filePath": "./log/icon_service.log",
         "outputType": "console|file",
@@ -9,8 +8,8 @@
             "type": "period|bytes",
             "period": "daily",
             "interval": 1,
-            "maxBytes": 10240000,
-            "backupCount": 5
+            "maxBytes": 10485760,
+            "backupCount": 10
         }
 	},
 	"scoreRootPath": ".score",
