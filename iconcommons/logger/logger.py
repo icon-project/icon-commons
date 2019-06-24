@@ -12,9 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-import logging
 import coloredlogs
+import io
+import logging
+import os
+import sys
+import traceback
 
 from logging import Logger as BuiltinLogger, FileHandler
 from enum import IntFlag
@@ -32,6 +35,45 @@ default_log_config = {
         "outputType": "console"
     }
 }
+
+if hasattr(sys, '_getframe'): currentframe = lambda: sys._getframe(3)
+
+#
+# _srcfile is used when walking the stack to check when we've got the first
+# caller stack frame.
+#
+_srcfile = os.path.normcase(currentframe.__code__.co_filename)
+
+
+def findCaller(self, stack_info=False):
+    """
+    Find the stack frame of the caller so that we can note the source
+    file name, line number and function name.
+    """
+    f = currentframe()
+    #On some versions of IronPython, currentframe() returns None if
+    #IronPython isn't run with -X:Frames.
+    if f is not None:
+        f = f.f_back
+    rv = "(unknown file)", 0, "(unknown function)", None
+    while hasattr(f, "f_code"):
+        co = f.f_code
+        filename = os.path.normcase(co.co_filename)
+        if filename == _srcfile:
+            f = f.f_back
+            continue
+        sinfo = None
+        if stack_info:
+            sio = io.StringIO()
+            sio.write('Stack (most recent call last):\n')
+            traceback.print_stack(f, file=sio)
+            sinfo = sio.getvalue()
+            if sinfo[-1] == '\n':
+                sinfo = sinfo[:-1]
+            sio.close()
+        rv = (co.co_filename, f.f_lineno, co.co_name, sinfo)
+        break
+    return rv
 
 
 class Logger:
@@ -124,6 +166,7 @@ class Logger:
     @staticmethod
     def _register_logger_mapper(logger_name: str, logger_type: str):
         logger = logging.getLogger(logger_name)
+        logger.findCaller = findCaller
         Logger._logger_mapper[logger_type] = logger
 
     @staticmethod
