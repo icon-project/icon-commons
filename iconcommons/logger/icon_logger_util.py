@@ -88,7 +88,7 @@ class RotateConfig:
 
 
 class LogConfig:
-    default_fmt = "[%(levelname)s|%(filename)s:%(lineno)s[%(threadName)s]] %(asctime)s > %(message)s"
+    default_fmt = "[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s"
 
     def __init__(self,
                  name: str,

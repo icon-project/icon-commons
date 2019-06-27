@@ -14,6 +14,7 @@
 
 import os
 import sys
+
 from logging import DEBUG, INFO, WARNING, ERROR, currentframe
 from .icon_logger_util import IconLoggerUtil, icon_logger
 
@@ -46,27 +47,27 @@ class Logger(object):
     @classmethod
     def debug(cls, msg: str, tag: str = "LOG"):
         if icon_logger.isEnabledFor(DEBUG):
-            cls._log(DEBUG, IconLoggerUtil.make_log_msg(msg, tag))
+            cls._log(DEBUG, IconLoggerUtil.make_log_msg(tag, msg))
 
     @classmethod
     def info(cls, msg: str, tag: str = "LOG"):
         if icon_logger.isEnabledFor(INFO):
-            cls._log(INFO, IconLoggerUtil.make_log_msg(msg, tag))
+            cls._log(INFO, IconLoggerUtil.make_log_msg(tag, msg))
 
     @classmethod
     def warning(cls, msg: str, tag: str = "LOG"):
         if icon_logger.isEnabledFor(WARNING):
-            cls._log(WARNING, IconLoggerUtil.make_log_msg(msg, tag))
+            cls._log(WARNING, IconLoggerUtil.make_log_msg(tag, msg))
 
     @classmethod
     def error(cls, msg: str, tag: str = "LOG"):
         if icon_logger.isEnabledFor(ERROR):
-            cls._log(ERROR, IconLoggerUtil.make_log_msg(msg, tag))
+            cls._log(ERROR, IconLoggerUtil.make_log_msg(tag, msg))
 
     @classmethod
     def exception(cls, msg: str, tag: str = "LOG"):
         if icon_logger.isEnabledFor(ERROR):
-            cls._log(ERROR, IconLoggerUtil.make_log_msg(msg, tag), exc_info=True)
+            cls._log(ERROR, IconLoggerUtil.make_log_msg(tag, msg), exc_info=True)
 
     @classmethod
     def _log(cls, level, msg, args=None, exc_info=None, extra=None):
