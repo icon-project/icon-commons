@@ -11,26 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import os
-
 import time
-from logging.handlers import BaseRotatingHandler
-from iconcommons.logger.logger_utils import suffix, extMatch
+from logging.handlers import RotatingFileHandler
+from iconcommons.logger.utils import suffix as rotate_suffix, extMatch as rotate_extMatch
 
 
-class IconBytesFileHandler(BaseRotatingHandler):
-    suffix = suffix
-    extMatch = extMatch
-
+class IconRotatingFileHandler(RotatingFileHandler):
     def __init__(self, filename, mode='a', maxBytes=0, backupCount=0, encoding=None, delay=False):
+        super().__init__(filename, mode, maxBytes, backupCount, encoding, delay)
 
-        if maxBytes > 0:
-            mode = 'a'
-
-        super().__init__(filename, mode, encoding, delay)
-
-        self.maxBytes = maxBytes
-        self.backupCount = backupCount
         self.rotator = self.custom_rotator
         self.logger_index = 0
 
@@ -50,29 +41,14 @@ class IconBytesFileHandler(BaseRotatingHandler):
             self.stream.close()
             self.stream = None
         dfn = self.rotation_filename(self.baseFilename + "." +
-                                     time.strftime(self.suffix, time.localtime()))
+                                     time.strftime(rotate_suffix, time.localtime()))
         self.rotate(self.baseFilename, dfn)
         for s in self.getFilesToDelete():
             os.remove(s)
         if not self.delay:
             self.stream = self._open()
 
-    def shouldRollover(self, record):
-        """
-        Determine if rollover should occur.
-
-        Basically, see if the supplied record would cause the file to exceed
-        the size limit we have.
-        """
-        if self.stream is None:                 # delay was set...
-            self.stream = self._open()
-        if self.maxBytes > 0:                   # are we rolling over?
-            msg = "%s\n" % self.format(record)
-            self.stream.seek(0, 2)  #due to non-posix-compliant Windows feature
-            if self.stream.tell() + len(msg) >= self.maxBytes:
-                return 1
-        return 0
-
+    # reference TimedRotatingFileHandler
     def getFilesToDelete(self):
         """
         Determine the files to delete when rolling over.
@@ -87,7 +63,7 @@ class IconBytesFileHandler(BaseRotatingHandler):
         for fileName in fileNames:
             if fileName[:plen] == prefix:
                 suffix = fileName[plen:]
-                if self.extMatch.match(suffix):
+                if rotate_extMatch.match(suffix):
                     result.append(os.path.join(dirName, fileName))
         if len(result) < self.backupCount:
             result = []

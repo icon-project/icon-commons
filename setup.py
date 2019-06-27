@@ -4,7 +4,6 @@ import os
 from setuptools import setup, find_packages
 
 requires = [
-    'coloredlogs==10.0',
 ]
 data_requires = [
     ('', ['VERSION'])
