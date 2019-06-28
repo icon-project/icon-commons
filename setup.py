@@ -5,9 +5,6 @@ from setuptools import setup, find_packages
 
 requires = [
 ]
-data_requires = [
-    ('', ['VERSION'])
-]
 
 version = os.environ.get('VERSION')
 if version is None:
@@ -26,7 +23,6 @@ setup_options = {
     'packages': find_packages(exclude=['tests*', 'docs']),
     'license': "Apache License 2.0",
     'install_requires': requires,
-    'data_files': data_requires,
     'classifiers': [
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers', 
