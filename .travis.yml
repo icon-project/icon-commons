@@ -9,6 +9,9 @@ branches:
   - /^release-.*$/
   - travis-test
 
+install:
+  - pip install wheel
+
 script:
   - python setup.py test
 
