@@ -23,6 +23,8 @@ setup_options = {
     'packages': find_packages(exclude=['tests*', 'docs']),
     'license': "Apache License 2.0",
     'install_requires': requires,
+    'setup_requires': ['pytest-runner'],
+    'tests_require': ['pytest'],
     'classifiers': [
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers', 

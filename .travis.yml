@@ -1,0 +1,22 @@
+language: python
+python:
+  - "3.6"
+
+branches:
+  only:
+  - master
+  - develop
+  - /^release-.*$/
+  - travis-test
+
+script:
+  - python setup.py test
+
+deploy:
+  provider: pypi
+  distributions: sdist bdist_wheel
+  server: https://test.pypi.org/legacy/
+  user: iconfoundation
+  password: $PYPI_PW
+  on:
+    branch: travis-test
