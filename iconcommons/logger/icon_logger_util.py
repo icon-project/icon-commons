@@ -227,9 +227,11 @@ class IconLoggerUtil(object):
 
     @classmethod
     def _make_exc_log_path(cls, src_path: str) -> str:
-        src_filename = src_path.rpartition('/')[-1]
-        converted_path = src_path.replace(src_filename, "exc/" + src_filename)
-        return converted_path
+        if src_path.endswith(".log"):
+            converted = src_path[:-4] + "_exc.log"
+        else:
+            converted = src_path + "_exc"
+        return converted
 
     @classmethod
     def _ensure_dir(cls, file_path: str):

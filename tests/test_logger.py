@@ -129,5 +129,17 @@ class TestLoggerOld(unittest.TestCase):
             Logger.debug(TAG, f'debug log{i}')
 
 
+class TestLogPath(unittest.TestCase):
+
+    def test_exc_log_path(self):
+        cases = [
+            ['./log/iconservice.log', './log/iconservice_exc.log'],
+            ['/.log/icon.log', '/.log/icon_exc.log'],
+            ['./log/iconservice', './log/iconservice_exc'],
+        ]
+        for c in cases:
+            self.assertEqual(c[1], IconLoggerUtil._make_exc_log_path(c[0]))
+
+
 if __name__ == '__main__':
     unittest.main()
