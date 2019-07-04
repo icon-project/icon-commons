@@ -156,7 +156,7 @@ class IconLoggerUtil(object):
                 cls._view_config_info(logger, value, tmp_prefix)
 
     @classmethod
-    def _apply_config(cls, logger: 'builtinLogger', log_config: 'LogConfig', include_exc=True):
+    def _apply_config(cls, logger: 'builtinLogger', log_config: 'LogConfig'):
         cls._formatter = Formatter(log_config.fmt)
 
         if cls._is_flag_on(log_config.output_type, OutputType.CONSOLE):
@@ -166,15 +166,10 @@ class IconLoggerUtil(object):
 
         if cls._is_flag_on(log_config.output_type, OutputType.FILE):
             cls._ensure_dir(log_config.file_path)
-            cls._ensure_dir(cls._make_exc_log_path(log_config.file_path))
 
             if log_config.rotate_config is None:
                 handler = cls.make_file_handler(log_config.file_path, cls._formatter)
                 logger.addHandler(handler)
-
-                if include_exc:
-                    exc_handler = cls.make_file_handler(log_config.file_path, cls._formatter, True)
-                    logger.addHandler(exc_handler)
             else:
                 rotate_type: 'Flag' = log_config.rotate_config.rotate_type
                 if cls._is_flag_on(rotate_type, RotateType.BOTH):
@@ -184,42 +179,17 @@ class IconLoggerUtil(object):
                                                                      log_config.rotate_config.max_bytes,
                                                                      log_config.rotate_config.backup_count)
                     logger.addHandler(handler)
-
-                    if include_exc:
-                        exc_handler = cls.make_period_and_bytes_file_handler(log_config.file_path,
-                                                                             log_config.rotate_config.period,
-                                                                             log_config.rotate_config.interval,
-                                                                             log_config.rotate_config.max_bytes,
-                                                                             log_config.rotate_config.backup_count,
-                                                                             True)
-                        logger.addHandler(exc_handler)
                 elif cls._is_flag_on(rotate_type, RotateType.PERIOD):
                     handler = cls.make_period_file_handler(log_config.file_path,
                                                            log_config.rotate_config.period,
                                                            log_config.rotate_config.interval,
                                                            log_config.rotate_config.backup_count)
                     logger.addHandler(handler)
-
-                    if include_exc:
-                        exc_handler = cls.make_period_file_handler(log_config.file_path,
-                                                                   log_config.rotate_config.period,
-                                                                   log_config.rotate_config.interval,
-                                                                   log_config.rotate_config.backup_count,
-                                                                   True)
-
-                        logger.addHandler(exc_handler)
                 elif cls._is_flag_on(rotate_type, RotateType.BYTES):
                     handler = cls.make_bytes_file_handler(log_config.file_path,
                                                           log_config.rotate_config.max_bytes,
                                                           log_config.rotate_config.backup_count)
                     logger.addHandler(handler)
-
-                    if include_exc:
-                        exc_handler = cls.make_bytes_file_handler(log_config.file_path,
-                                                                  log_config.rotate_config.max_bytes,
-                                                                  log_config.rotate_config.backup_count,
-                                                                  True)
-                        logger.addHandler(exc_handler)
 
     @classmethod
     def _is_flag_on(cls, src_flag: 'Flag', dest_flag: 'Flag') -> bool:
@@ -246,18 +216,9 @@ class IconLoggerUtil(object):
     @classmethod
     def make_file_handler(cls,
                           file_path: str,
-                          formatter: 'Formatter',
-                          exc: bool = False) -> 'Handler':
-
-        if exc:
-            file_path = cls._make_exc_log_path(file_path)
-
+                          formatter: 'Formatter') -> 'Handler':
         handler = FileHandler(file_path, 'a')
         handler.setFormatter(formatter)
-
-        if exc:
-            handler.setLevel("ERROR")
-
         return handler
 
     @classmethod
@@ -266,22 +227,13 @@ class IconLoggerUtil(object):
                                            when: str,
                                            interval: int,
                                            max_bytes: int,
-                                           backup_count: int,
-                                           exc: bool = False) -> 'Handler':
-
-        if exc:
-            file_path = cls._make_exc_log_path(file_path)
-
+                                           backup_count: int) -> 'Handler':
         handler = IconPeriodAndBytesFileHandler(file_path,
                                                 maxBytes=max_bytes,
                                                 when=when,
                                                 interval=interval,
                                                 backupCount=backup_count)
         handler.setFormatter(cls._formatter)
-
-        if exc:
-            handler.setLevel("ERROR")
-
         return handler
 
     @classmethod
@@ -289,42 +241,23 @@ class IconLoggerUtil(object):
                                  file_path: str,
                                  when: str,
                                  interval: int,
-                                 backup_count: int,
-                                 exc: bool = False) -> 'Handler':
-
-        if exc:
-            file_path = cls._make_exc_log_path(file_path)
-
+                                 backup_count: int) -> 'Handler':
         handler = IconTimeRotatingFileHandler(file_path,
                                               when=when,
                                               interval=interval,
                                               backupCount=backup_count)
         handler.setFormatter(cls._formatter)
-
-        if exc:
-            handler.setLevel("ERROR")
-
         return handler
 
     @classmethod
     def make_bytes_file_handler(cls,
                                 file_path: str,
                                 max_bytes: int,
-                                backup_count: int,
-                                exc: bool = False) -> 'Handler':
-
-        if exc:
-            file_path = cls._make_exc_log_path(file_path)
-
+                                backup_count: int) -> 'Handler':
         handler = IconRotatingFileHandler(file_path,
                                           maxBytes=max_bytes,
                                           backupCount=backup_count)
-
         handler.setFormatter(cls._formatter)
-
-        if exc:
-            handler.setLevel("ERROR")
-
         return handler
 
 
