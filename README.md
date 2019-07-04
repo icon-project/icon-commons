@@ -10,7 +10,7 @@ $ virtualenv -p python3 venv  # create a virtual environment
 $ source venv/bin/activate    # switch to the virtual environment
 (venv) $ ./build.sh           # run the build script
 (venv) $ ls dist/             # check the generated wheel file
-iconcommons-1.0.5-py3-none-any.whl
+iconcommons-1.1.0-py3-none-any.whl
 ```
 
 ## Installation
@@ -22,10 +22,9 @@ Basically you can install ICON Commons package by using `pip3` command on your l
 ICON Commons package requires the following environments.
 
 - OS: MacOS, Linux
-
   - Windows is not supported
 - Python
-  - Make a virtual environment for Python 3.6.5+
+  - Make a virtualenv for Python 3.6.5+ (3.7 is also supported)
   - Check your Python version
     ```bash
     $ python3 -V
@@ -36,7 +35,6 @@ ICON Commons package requires the following environments.
 ### Installing on MacOS / Linux
 
 ```bash
-# install the ICON Commons
 (venv) $ pip3 install iconcommons
 ```
 
