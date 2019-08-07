@@ -14,14 +14,13 @@
 
 import logging
 import os
-
-from logging import Logger as builtinLogger, FileHandler, Formatter, Handler
 from enum import Flag
+from logging import Logger as builtinLogger, FileHandler, Formatter, Handler
 from typing import Union
 
 from .icon_period_and_bytes_file_handler import IconPeriodAndBytesFileHandler
-from .icon_time_rotating_file_handler import IconTimeRotatingFileHandler
 from .icon_rotating_file_handler import IconRotatingFileHandler
+from .icon_time_rotating_file_handler import IconTimeRotatingFileHandler
 
 
 class OutputType(Flag):
@@ -88,7 +87,7 @@ class RotateConfig:
 
 
 class LogConfig:
-    default_fmt = "[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s"
+    DEFAULT_FORMAT = "%(asctime)s %(process)d %(thread)d %(levelname)s %(filename)s(%(lineno)d) %(message)s"
 
     def __init__(self,
                  name: str,
@@ -114,7 +113,7 @@ class LogConfig:
         name: str = config.get('name', "ICONLogger")
         level: str = config.get('level', 'info').upper()
         file_path: str = config.get('filePath', "")
-        fmt: str = config.get('format', cls.default_fmt)
+        fmt: str = config.get('format', cls.DEFAULT_FORMAT)
         output_type: 'OutputType' = OutputType.NONE
 
         output_types: str = config.get('outputType')
@@ -211,7 +210,7 @@ class IconLoggerUtil(object):
 
     @classmethod
     def make_log_msg(cls, tag: str, msg: Union[str, BaseException]):
-        return f'[{tag}] {msg}'
+        return f'{tag} {msg}'
 
     @classmethod
     def make_file_handler(cls,
