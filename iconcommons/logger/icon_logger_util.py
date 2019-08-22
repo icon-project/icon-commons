@@ -204,9 +204,8 @@ class IconLoggerUtil(object):
 
     @classmethod
     def _ensure_dir(cls, file_path: str):
-        directory = os.path.dirname(file_path)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+        directory = os.path.dirname(os.path.abspath(file_path))
+        os.makedirs(directory, exist_ok=True)
 
     @classmethod
     def make_log_msg(cls, tag: str, msg: Union[str, BaseException]):
