@@ -14,11 +14,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import os
 import unittest
 
 from iconcommons.icon_config import IconConfig
-from iconcommons.logger import Logger
+from iconcommons.logger import IconLoggerUtil, icon_logger
 
 
 TAG = 'logger'
@@ -47,74 +48,58 @@ default_icon_config = {
     }
 }
 
-default_icon_config2 = {
-    "log": {
-        "logger": "test",
-        "level": "debug",
-        "filePath": "./log/icon_service.log",
-        "outputType": "console|file",
-        "rotate": {
-            "type": "period|bytes",
-            "period": "daily",
-            "atTime": 1,
-            "interval": 1,
-            "maxBytes": 10485760,
-            "backupCount": 10
-        }
-    },
-    "scoreRootPath": ".score",
-    "stateDbRootPath": ".statedb",
-    "channel": "loopchain_default",
-    "amqpKey": "7100",
-    "amqpTarget": "127.0.0.1",
-    "iconServiceBigStopLimit": 5000000,
-    "builtinScoreOwner": "hxebf3a409845cd09dcb5af31ed5be5e34e2af9433",
-    "service": {
-        "fee": False,
-        "audit": False
-    }
-}
 
-
-class TestLoggerOld(unittest.TestCase):
+class TestLogger(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        conf = IconConfig(str(), default_icon_config2)
+        conf = IconConfig(str(), default_icon_config)
         conf.load()
-        Logger.load_config(conf)
-        Logger.print_config(conf, TAG)
+        IconLoggerUtil.apply_config(icon_logger, conf)
+        IconLoggerUtil.print_config(icon_logger, conf)
 
         file_path = os.path.join(os.path.dirname(__file__), 'logger.json')
         conf = IconConfig(file_path, default_icon_config)
         conf.load()
-        Logger.load_config(conf)
-        Logger.print_config(conf, TAG)
+        IconLoggerUtil.apply_config(icon_logger, conf)
+        IconLoggerUtil.print_config(icon_logger, conf)
 
     @classmethod
     def tearDownClass(cls):
         pass
 
     def test_debug(self):
-        Logger.debug(TAG, 'debug log')
+        icon_logger.debug(IconLoggerUtil.make_log_msg(TAG, 'debug log'))
 
     def test_info(self):
-        Logger.info(TAG, 'info log')
+        icon_logger.info(IconLoggerUtil.make_log_msg(TAG, 'info log'))
 
     def test_warning(self):
-        Logger.warning(TAG, 'warning log')
+        icon_logger.warning(IconLoggerUtil.make_log_msg(TAG, 'warning log'))
 
     def test_exception(self):
         try:
             raise Exception()
         except:
-            Logger.exception(TAG, 'exception log')
+            icon_logger.exception(IconLoggerUtil.make_log_msg(TAG, 'exception log'))
 
     def test_error(self):
-        Logger.error(TAG, 'error log')
+        icon_logger.error(IconLoggerUtil.make_log_msg(TAG, 'error log'))
 
     def test_many_debug(self):
         for i in range(100):
-            Logger.debug(TAG, f'debug log{i}')
+            icon_logger.debug(IconLoggerUtil.make_log_msg(TAG, f'debug log{i}'))
+
+
+class TestLogPath(unittest.TestCase):
+
+    def test_exc_log_path(self):
+        cases = [
+            ['./log/iconservice.log', './log/iconservice_exc.log'],
+            ['/.log/icon.log', '/.log/icon_exc.log'],
+            ['./log/iconservice', './log/iconservice_exc'],
+        ]
+        for c in cases:
+            self.assertEqual(c[1], IconLoggerUtil._make_exc_log_path(c[0]))
 
 
 if __name__ == '__main__':

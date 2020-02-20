@@ -14,8 +14,9 @@
 
 import logging
 import os
+from datetime import time
 from enum import Flag
-from logging import Logger as builtinLogger, FileHandler, Formatter, Handler
+from logging import Logger as builtinLogger, FileHandler, StreamHandler, Formatter, Handler
 from typing import Union
 
 from .icon_period_and_bytes_file_handler import IconPeriodAndBytesFileHandler
@@ -40,11 +41,13 @@ class RotateConfig:
     def __init__(self,
                  rotate_type: 'RotateType',
                  period: str,
+                 at_time: 'time',
                  interval: int,
                  max_bytes: int,
                  backup_count: int):
         self.rotate_type: 'RotateType' = rotate_type
         self.period: str = period
+        self.at_time: 'time' = at_time
         self.interval: int = interval
         self.max_bytes: int = max_bytes
         self.backup_count: int = backup_count
@@ -64,18 +67,26 @@ class RotateConfig:
                 rotate_type |= RotateType[rotate.upper()]
 
         period: str = cls._convert_period(config.get('period', "daily"))
+        at_time: 'time' = cls._convert_at_time(config.get("atTime", 0))
         interval: int = config.get('interval')
         max_bytes: int = config.get('maxBytes')
         backup_count: int = config.get("backupCount")
 
-        return RotateConfig(rotate_type, period, interval, max_bytes, backup_count)
+        return RotateConfig(rotate_type=rotate_type,
+                            period=period,
+                            at_time=at_time,
+                            interval=interval,
+                            max_bytes=max_bytes,
+                            backup_count=backup_count)
+
+    @classmethod
+    def _convert_at_time(cls, value: int) -> 'time':
+        return time(hour=value)
 
     @classmethod
     def _convert_period(cls, value: str):
         if value == 'daily':
             return 'D'
-        elif value == 'weekly':
-            return 'W'
         elif value == 'hourly':
             return 'H'
         elif value == 'minutely':
@@ -84,6 +95,9 @@ class RotateConfig:
             return 'S'
         elif value == 'midnight':
             return 'MIDNIGHT'
+        elif "weekly" in value:
+            d_index = value[-1]
+            return f'W{d_index}'
         else:
             return 'D'
 
@@ -161,7 +175,7 @@ class IconLoggerUtil(object):
         cls._formatter = Formatter(log_config.fmt)
 
         if cls._is_flag_on(log_config.output_type, OutputType.CONSOLE):
-            handler = logging.StreamHandler()
+            handler = StreamHandler()
             handler.setFormatter(cls._formatter)
             logger.addHandler(handler)
 
@@ -178,13 +192,15 @@ class IconLoggerUtil(object):
                                                                      log_config.rotate_config.period,
                                                                      log_config.rotate_config.interval,
                                                                      log_config.rotate_config.max_bytes,
-                                                                     log_config.rotate_config.backup_count)
+                                                                     log_config.rotate_config.backup_count,
+                                                                     log_config.rotate_config.at_time)
                     logger.addHandler(handler)
                 elif cls._is_flag_on(rotate_type, RotateType.PERIOD):
                     handler = cls.make_period_file_handler(log_config.file_path,
                                                            log_config.rotate_config.period,
                                                            log_config.rotate_config.interval,
-                                                           log_config.rotate_config.backup_count)
+                                                           log_config.rotate_config.backup_count,
+                                                           log_config.rotate_config.at_time)
                     logger.addHandler(handler)
                 elif cls._is_flag_on(rotate_type, RotateType.BYTES):
                     handler = cls.make_bytes_file_handler(log_config.file_path,
@@ -227,12 +243,14 @@ class IconLoggerUtil(object):
                                            when: str,
                                            interval: int,
                                            max_bytes: int,
-                                           backup_count: int) -> 'Handler':
+                                           backup_count: int,
+                                           at_time: 'time') -> 'Handler':
         handler = IconPeriodAndBytesFileHandler(file_path,
                                                 maxBytes=max_bytes,
                                                 when=when,
                                                 interval=interval,
-                                                backupCount=backup_count)
+                                                backupCount=backup_count,
+                                                atTime=at_time)
         handler.setFormatter(cls._formatter)
         return handler
 
@@ -241,11 +259,13 @@ class IconLoggerUtil(object):
                                  file_path: str,
                                  when: str,
                                  interval: int,
-                                 backup_count: int) -> 'Handler':
+                                 backup_count: int,
+                                 at_time: 'time') -> 'Handler':
         handler = IconTimeRotatingFileHandler(file_path,
                                               when=when,
                                               interval=interval,
-                                              backupCount=backup_count)
+                                              backupCount=backup_count,
+                                              atTime=at_time)
         handler.setFormatter(cls._formatter)
         return handler
 
@@ -259,6 +279,5 @@ class IconLoggerUtil(object):
                                           backupCount=backup_count)
         handler.setFormatter(cls._formatter)
         return handler
-
 
 icon_logger = logging.Logger("ICONLogger")

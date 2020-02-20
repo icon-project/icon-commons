@@ -15,12 +15,18 @@
 import os
 import time
 from logging.handlers import TimedRotatingFileHandler
-from iconcommons.logger.utils import suffix as rotate_suffix, extMatch as rotate_extMatch
+from .utils import suffix as rotate_suffix, extMatch as rotate_extMatch
 
 
 class IconTimeRotatingFileHandler(TimedRotatingFileHandler):
-    def __init__(self, filename, when='h', interval=1, backupCount=0,
-                 encoding=None, delay=False, utc=False, atTime=None):
+    def __init__(self, filename,
+                 when='h',
+                 interval=1,
+                 backupCount=0,
+                 encoding=None,
+                 delay=False,
+                 utc=False,
+                 atTime=None):
         super().__init__(filename, when, interval, backupCount, encoding, delay, utc, atTime)
 
     def getFilesToDelete(self):

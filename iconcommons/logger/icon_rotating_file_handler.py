@@ -15,7 +15,7 @@
 import os
 import time
 from logging.handlers import RotatingFileHandler
-from iconcommons.logger.utils import suffix as rotate_suffix, extMatch as rotate_extMatch
+from .utils import suffix as rotate_suffix, extMatch as rotate_extMatch
 
 
 class IconRotatingFileHandler(RotatingFileHandler):
