@@ -82,6 +82,8 @@ class RotateConfig:
             return 'M'
         elif value == 'secondly':
             return 'S'
+        elif value == 'midnight':
+            return 'MIDNIGHT'
         else:
             return 'D'
 
