@@ -15,16 +15,12 @@
 import os
 import sys
 from logging import DEBUG, INFO, WARNING, ERROR, currentframe
-
-from .icon_logger_util import IconLoggerUtil, icon_logger
-
+from ._logger import IconLoggerUtil, icon_logger
 
 # This code is mainly copied from the python logging module, with minor modifications
-
 # _srcfile is used when walking the stack to check when we've got the first
 # caller stack frame.
 #
-
 
 if hasattr(sys, 'frozen'): #support for py2exe
     _srcfile = "logging%s__init__%s" % (os.sep, __file__[-4:])

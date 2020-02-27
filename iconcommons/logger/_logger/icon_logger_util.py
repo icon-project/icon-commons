@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
 import os
 from datetime import time
 from enum import Flag
@@ -280,4 +279,5 @@ class IconLoggerUtil(object):
         handler.setFormatter(cls._formatter)
         return handler
 
-icon_logger = logging.Logger("ICONLogger")
+
+icon_logger = builtinLogger("ICONLogger")

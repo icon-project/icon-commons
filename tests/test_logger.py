@@ -17,8 +17,7 @@
 import os
 import unittest
 
-from iconcommons.icon_config import IconConfig
-from iconcommons.logger import Logger
+from iconcommons import Logger, IconConfig
 
 
 TAG = 'logger'
@@ -34,16 +33,6 @@ default_icon_config = {
             "backupCount": 10,
             "maxBytes": 10485760
         }
-    },
-    "scoreRootPath": ".score",
-    "stateDbRootPath": ".statedb",
-    "channel": "loopchain_default",
-    "amqpKey": "7100",
-    "amqpTarget": "127.0.0.1",
-    "builtinScoreOwner": "hxebf3a409845cd09dcb5af31ed5be5e34e2af9433",
-    "service": {
-        "fee": False,
-        "audit": False
     }
 }
 
@@ -61,22 +50,11 @@ default_icon_config2 = {
             "maxBytes": 10485760,
             "backupCount": 10
         }
-    },
-    "scoreRootPath": ".score",
-    "stateDbRootPath": ".statedb",
-    "channel": "loopchain_default",
-    "amqpKey": "7100",
-    "amqpTarget": "127.0.0.1",
-    "iconServiceBigStopLimit": 5000000,
-    "builtinScoreOwner": "hxebf3a409845cd09dcb5af31ed5be5e34e2af9433",
-    "service": {
-        "fee": False,
-        "audit": False
     }
 }
 
 
-class TestLoggerOld(unittest.TestCase):
+class TestLogger(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         conf = IconConfig(str(), default_icon_config2)
