@@ -19,7 +19,6 @@ import unittest
 
 from iconcommons import Logger, IconConfig
 
-
 TAG = 'logger'
 
 default_icon_config = {

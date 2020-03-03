@@ -22,6 +22,9 @@ from .icon_period_and_bytes_file_handler import IconPeriodAndBytesFileHandler
 from .icon_rotating_file_handler import IconRotatingFileHandler
 from .icon_time_rotating_file_handler import IconTimeRotatingFileHandler
 
+import re
+weekly_p = re.compile("^weekly[0-6]$")
+
 
 class OutputType(Flag):
     NONE = 0
@@ -94,11 +97,11 @@ class RotateConfig:
             return 'S'
         elif value == 'midnight':
             return 'MIDNIGHT'
-        elif "weekly" in value:
+        elif weekly_p.match(value):
             d_index = value[-1]
             return f'W{d_index}'
         else:
-            return 'D'
+            raise ValueError("Invalid period")
 
 
 class LogConfig:
