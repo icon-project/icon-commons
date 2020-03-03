@@ -12,5 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .icon_config import IconConfig
-from .logger import Logger
+from .icon_logger_util import IconLoggerUtil, icon_logger
