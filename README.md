@@ -10,7 +10,7 @@ $ virtualenv -p python3 venv  # create a virtual environment
 $ source venv/bin/activate    # switch to the virtual environment
 (venv) $ ./build.sh           # run the build script
 (venv) $ ls dist/             # check the generated wheel file
-iconcommons-1.1.2-py3-none-any.whl
+iconcommons-1.1.3-py3-none-any.whl
 ```
 
 ## Installation
