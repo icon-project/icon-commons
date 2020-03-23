@@ -23,8 +23,16 @@ from .icon_time_rotating_file_handler import IconTimeRotatingFileHandler
 
 
 class IconPeriodAndBytesFileHandler(BaseRotatingHandler):
-    def __init__(self, filename, mode='a', maxBytes=0, backupCount=0,
-                 encoding=None, delay=0, when='h', interval=1, utc=False):
+    def __init__(self, filename,
+                 mode='a',
+                 maxBytes=0,
+                 backupCount=0,
+                 encoding=None,
+                 delay=0,
+                 when='h',
+                 interval=1,
+                 utc=False,
+                 atTime=None):
         super().__init__(filename, mode, encoding, delay)
 
         '''
@@ -63,6 +71,7 @@ class IconPeriodAndBytesFileHandler(BaseRotatingHandler):
         self.when = when.upper()
         self.interval = interval
         self.utc = utc
+        self.atTime = atTime
 
         if self.when == 'S':
             self.interval = 1 # one second
