@@ -1,3 +1,7 @@
+# This repository archived. Refer to ICON 2.0 aka [goloop](https://github.com/icon-project/goloop).
+
+----
+
 # ICON Commons
 
 ICON Commons is a utility project which is used for running T-Bears and ICON Service.
